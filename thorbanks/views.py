@@ -46,15 +46,17 @@ def response(request):
         raise PaymentError("Invalid signature. ")
 
     if data['VK_SERVICE'] == '1101':
-        # Mark purchase as complete
-        transaction.status = Transaction.STATUS_COMPLETED
-        transaction.save()
-        transaction_succeeded.send(Transaction, transaction=transaction)
+        if transaction.status == Transaction.STATUS_PENDING:
+            # Mark purchase as complete
+            transaction.status = Transaction.STATUS_COMPLETED
+            transaction.save()
+            transaction_succeeded.send(Transaction, transaction=transaction)
     elif data['VK_SERVICE'] == '1901':
-        # Mark purchase as failed
-        transaction.status = Transaction.STATUS_FAILED
-        transaction.save()
-        transaction_failed.send(Transaction, transaction=transaction)
+        if transaction.status == Transaction.STATUS_PENDING:
+            # Mark purchase as failed
+            transaction.status = Transaction.STATUS_FAILED
+            transaction.save()
+            transaction_failed.send(Transaction, transaction=transaction)
     else:
         logging.critical("thorbanks.views.response(): Got invalid VK_SERVICE code from bank: %s (transaction %s)",
                          data['VK_SERVICE'], data['VK_STAMP'])
