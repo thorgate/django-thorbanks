@@ -1,0 +1,13 @@
+[run]
+branch = False
+source =
+    thorbanks
+
+omit =
+    */migrations/*
+    setup.py
+    runtests.py
+    example
+
+[html]
+directory = cover

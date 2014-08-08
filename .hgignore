@@ -1,0 +1,25 @@
+syntax: re
+
+# Ignore everything in .idea but the project's .iml file and runConfigurations/ subdirectory
+^\.idea/(?!(springella\.iml$|runConfigurations))
+
+
+syntax: glob
+
+*.pyc
+.sass-cache/
+django_thorbanks.egg-info
+build/
+dist/
+
+venv/
+venv3.4/
+
+example/certs/
+example/settings/local.py
+example/db.sqlite3
+example/assets/
+example/media/
+
+.coverage
+cover/
