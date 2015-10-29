@@ -8,14 +8,75 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.encoding import force_text
 from django.utils.html import conditional_escape
-from django.utils.safestring import SafeUnicode, mark_safe
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from thorbanks import settings
 from thorbanks.utils import create_signature
-from thorbanks.models import Transaction
 from thorbanks.signals import transaction_started
 from thorbanks.utils import calculate_731_checksum
+
+
+class AuthRequest(forms.Form):
+    VK_SERVICE = forms.CharField(widget=forms.HiddenInput())
+    VK_VERSION = forms.CharField(widget=forms.HiddenInput())
+    VK_SND_ID = forms.CharField(widget=forms.HiddenInput())
+    VK_REPLY = forms.CharField(widget=forms.HiddenInput())
+    VK_RETURN = forms.CharField(widget=forms.HiddenInput())
+    VK_DATETIME = forms.CharField(widget=forms.HiddenInput())
+    VK_RID = forms.CharField(widget=forms.HiddenInput())
+    VK_ENCODING = forms.CharField(widget=forms.HiddenInput())
+    VK_MAC = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    def __init__(self, bank_name, redirect_to, response_url, *args, **kwargs):
+        self.auth = settings.get_model('Authentication')()
+        self.auth.bank_name = bank_name
+        self.auth.redirect_after_success = redirect_to
+        self.auth.redirect_on_failure = redirect_to
+        self.auth.save()
+
+        initial = {
+            'VK_RID': self.auth.pk,
+            'VK_SERVICE': '4011',
+            'VK_VERSION': '008',
+            'VK_REPLY': '3012',
+            'VK_SND_ID': settings.get_snd_id(bank_name),
+            'VK_RETURN': response_url,
+            'VK_DATETIME': self.auth.created.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'VK_ENCODING': settings.get_encoding(bank_name)
+        }
+
+        super(AuthRequest, self).__init__(initial, *args, **kwargs)
+
+        if self.is_valid():
+            mac = create_signature(self.cleaned_data, self.auth.bank_name, auth=True)
+            self.data['VK_MAC'] = mac
+            if not self.is_valid():
+                raise RuntimeError("signature is invalid")
+        else:
+            raise RuntimeError("invalid initial data")
+
+    def redirect_html(self):
+        """ Redirection html """
+        html = '<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">' % (self.get_request_url(),
+                                                                                                    self.get_encoding())
+
+        for field in self:
+            html += force_text(field) + "\n"
+
+        html += '</form>'
+        html += """<script type="text/javascript">
+                       document.forms['banklink_redirect_url'].submit();
+                   </script>
+                """
+
+        return mark_safe(html)
+
+    def get_request_url(self):
+        return settings.get_request_url(self.auth.bank_name)
+
+    def get_encoding(self):
+        return settings.get_encoding(self.auth.bank_name)
 
 
 class PaymentRequest(forms.Form):
@@ -43,7 +104,7 @@ class PaymentRequest(forms.Form):
             kwargs['message'] = kwargs['message'].replace(':', '')
 
         initial = {}
-        self.transaction = Transaction()
+        self.transaction = settings.get_model('Transaction')()
         self.transaction.bank_name = kwargs['bank_name']
         self.transaction.description = kwargs['message']
         self.transaction.amount = initial['VK_AMOUNT'] = kwargs['amount']
@@ -60,7 +121,7 @@ class PaymentRequest(forms.Form):
         self.transaction.redirect_on_failure = kwargs['redirect_on_failure']
         self.transaction.save()
 
-        transaction_started.send(Transaction, transaction=self.transaction)
+        transaction_started.send(settings.get_model('Transaction'), transaction=self.transaction)
         initial['VK_REF'] = calculate_731_checksum(self.transaction.pk)
         initial['VK_STAMP'] = self.transaction.pk
 
@@ -101,15 +162,15 @@ class PaymentRequest(forms.Form):
         html += u'''<script type="text/javascript">
                     document.forms['banklink_redirect_url'].submit();
                     </script>'''
-        return SafeUnicode(html)
+        return mark_safe(html)
 
     def submit_button(self, value=u"Make the payment"):
         html = u'<form action="%s" method="POST">' % (settings.get_request_url(self.transaction.bank_name))
         for field in self:
             html += unicode(field) + u"\n"
-        html += '<input type="submit" value="%s" />' % (value)
+        html += '<input type="submit" value="%s" />' % value
         html += '</form>'
-        return SafeUnicode(html)
+        return mark_safe(html)
 
     def as_html(self, with_submit=False, id="banklink_payment_form", submit_value="submit" ):
         """ return transaction form for redirect to HanzaNet """

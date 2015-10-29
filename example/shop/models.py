@@ -4,13 +4,12 @@ from django.db import models
 from django.dispatch.dispatcher import receiver
 
 from thorbanks.signals import transaction_succeeded, transaction_failed
-from thorbanks.models import Transaction
 
 
 class Order(models.Model):
     amount = models.FloatField()
 
-    transaction = models.OneToOneField(Transaction, null=True)
+    transaction = models.OneToOneField('thorbanks.Transaction', null=True)
     is_paid = models.BooleanField(default=False)
 
     def complete(self):

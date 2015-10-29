@@ -1,9 +1,9 @@
 import random
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import RequestFactory
-from django.utils.encoding import force_text
 
 from thorbanks import settings
 from thorbanks.forms import PaymentRequest
@@ -156,15 +156,11 @@ class TestThorBanksSettings(TestCase):
     def test_ensure_imports(self):
         """ This test is currently used to make coverage report correctly for all files in this project.
         """
-        import thorbanks.urls
-        import thorbanks.admin
-        import thorbanks.views
 
 
 class TestTransactionModel(TestCase):
     def test_str_method(self):
-        from thorbanks.models import Transaction
-        trans = Transaction(pk=1, currency='EUR', amount=15.67, bank_name='myBank')
+        trans = settings.get_model('Transaction')(pk=1, currency='EUR', amount=15.67, bank_name='myBank')
 
         self.assertEqual(trans.__str__(), "Transaction 1 - EUR 15.67 from myBank [pending]")
 

@@ -1,10 +1,22 @@
 import os
+import sys
+
 from setuptools import setup, find_packages
 
 from thorbanks import __version__ as version
 
+
+if sys.argv[-1] == 'publish':
+    os.system('python setup.py sdist upload')
+    print("You probably want to also tag the version now:")
+    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("  git push --tags")
+    sys.exit()
+
+
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
     readme = f.read()
+
 
 setup(
     name='django-thorbanks',

@@ -15,6 +15,7 @@ dist/
 venv/
 venv3.4/
 
+thorbanks/migrations/
 example/certs/
 example/settings/local.py
 example/db.sqlite3

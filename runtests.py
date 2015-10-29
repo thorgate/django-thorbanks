@@ -20,7 +20,7 @@ settings.configure(
         'thorbanks',
     ),
 
-    BANKLINKS = {
+    BANKLINKS={
         'swedbank': {
             'PRINTABLE_NAME': 'Swedbank',
             'REQUEST_URL': 'https://pangalink.net/banklink/swedbank',
@@ -33,6 +33,7 @@ settings.configure(
         },
     },
 )
+
 
 from django.test.runner import DiscoverRunner
 

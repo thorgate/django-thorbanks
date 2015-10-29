@@ -1,5 +1,11 @@
 from django.contrib import admin
 
-from thorbanks.models import Transaction
+from thorbanks import settings
 
-admin.site.register(Transaction)
+
+if not settings.manual_models('Transaction'):
+    admin.site.register(settings.get_model('Transaction'))
+
+
+if not settings.manual_models('Authentication'):
+    admin.site.register(settings.get_model('Authentication'))

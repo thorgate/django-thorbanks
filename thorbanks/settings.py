@@ -1,4 +1,6 @@
 import os
+
+from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -15,7 +17,7 @@ def configure():
         raise ImproperlyConfigured(u"settings.BANKLINKS must be dict")
     else:
         # Verify it contains proper data
-        for bank_name, data in LINKS.iteritems():
+        for bank_name, data in LINKS.items():
             if len(bank_name) > 16:
                 raise ImproperlyConfigured(u"Bank's name must be at most 16 characters (%s)" % bank_name)
             if type(data) != dict:
@@ -38,6 +40,19 @@ def configure():
 
 
 configure()
+
+
+def get_model(model_name):
+    return apps.get_model('thorbanks.%s' % model_name)
+
+
+def manual_models(model_name):
+    manual = getattr(settings, 'THORBANKS_MANUAL_MODELS', False)
+
+    if manual and isinstance(manual, (list, tuple)):
+        return model_name in manual
+
+    return False
 
 
 # Shorthand methods
