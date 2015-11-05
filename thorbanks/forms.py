@@ -157,7 +157,7 @@ class PaymentRequest(forms.Form):
         html = u'<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">' % (
             self.get_request_url(), self.get_encoding())
         for field in self:
-            html += unicode(field) + u"\n"
+            html += str(field) + u"\n"
         html += u'</form>'
         html += u'''<script type="text/javascript">
                     document.forms['banklink_redirect_url'].submit();
@@ -167,7 +167,7 @@ class PaymentRequest(forms.Form):
     def submit_button(self, value=u"Make the payment"):
         html = u'<form action="%s" method="POST">' % (settings.get_request_url(self.transaction.bank_name))
         for field in self:
-            html += unicode(field) + u"\n"
+            html += str(field) + u"\n"
         html += '<input type="submit" value="%s" />' % value
         html += '</form>'
         return mark_safe(html)
@@ -177,7 +177,7 @@ class PaymentRequest(forms.Form):
         warn("deprecated", DeprecationWarning)
         html = u'<form action="%s" method="POST" id="%s">' % (settings.get_request_url(self.transaction.bank_name), id)
         for field in self:
-            html += unicode(field) + u"\n"
+            html += str(field) + u"\n"
         if with_submit:
             html += '<input type="submit" value="%s"/>' % (submit_value, )
         html += '</form>'

@@ -203,12 +203,12 @@ class TestPaymentFlow(TestCase):
             self.assertEqual(request['VK_RETURN'].value(), ping_back)
 
             self.assertEqual(request_digest(request.cleaned_data, request.transaction.bank_name),
-                             '0041002003008009uid513131001100513.99003EUR00213015My cool payment')
+                             b'0041002003008009uid513131001100513.99003EUR00213015My cool payment')
 
             # NOTE: This test will only work with the original certificate.
             self.assertEqual(request['VK_MAC'].value(),
-                             'pFNyPhXm4xRj7RIVwTSSDCFvhtMV/VksaeMIxPbeFXXNaOZtDeKGGOMVkWDWm4alMJ7v4gX'
-                             '0bVFadXeLH4FpDfaxawHcS+GLKxEh4l4QY6n+VtxVRmshymOkwrzhQYR4liYX7aS5lnVVS7'
-                             'vJdzF4f9hvVEmE3d7E7Ecj9A4d5mOOGmaR3h9J1eK+jllP1p64H5s/HVoKN7pB5ITkslbHr'
-                             'ybflAsPzqoCZlNiGL+N4SxIsV08MrHcKI7HgERqsOQzDyNwZHEwC9G04+nOTlwPQT/gE9gp'
-                             'MDpRwVkZrbLeePn/l5o9fBVX2nqL27GOaEBUXqTKlHAX1bRiwbly6bV+vg==')
+                             b'pFNyPhXm4xRj7RIVwTSSDCFvhtMV/VksaeMIxPbeFXXNaOZtDeKGGOMVkWDWm4alMJ7v4gX'
+                             b'0bVFadXeLH4FpDfaxawHcS+GLKxEh4l4QY6n+VtxVRmshymOkwrzhQYR4liYX7aS5lnVVS7'
+                             b'vJdzF4f9hvVEmE3d7E7Ecj9A4d5mOOGmaR3h9J1eK+jllP1p64H5s/HVoKN7pB5ITkslbHr'
+                             b'ybflAsPzqoCZlNiGL+N4SxIsV08MrHcKI7HgERqsOQzDyNwZHEwC9G04+nOTlwPQT/gE9gp'
+                             b'MDpRwVkZrbLeePn/l5o9fBVX2nqL27GOaEBUXqTKlHAX1bRiwbly6bV+vg==')
