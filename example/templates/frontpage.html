@@ -1,7 +1,6 @@
-Welcome to Thorbanks demo!
+<h1>Welcome to Thorbanks demo!</h1>
 
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Pay!">
-</form>
+<ul>
+    <li><a href="{% url 'payment' %}">Payment demo</a></li>
+    <li><a href="{% url 'auth' %}">Authentication demo</a></li>
+</ul>
