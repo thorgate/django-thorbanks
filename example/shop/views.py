@@ -90,7 +90,7 @@ class AuthenticationCompleteView(AuthResponseView, TemplateView):
             return None
 
         # Check if the person code is present
-        if 'VK_USER_ID' not in self.data:
+        if 'person_code' not in self.data:
             return None
 
         return self.data
@@ -102,6 +102,5 @@ class AuthenticationCompleteView(AuthResponseView, TemplateView):
             self.template_name = 'auth/failed.html'
         else:
             self.template_name = 'auth/success.html'
-            print(data)
 
         return self.render_to_response(data)

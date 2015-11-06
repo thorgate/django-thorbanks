@@ -1,5 +1,6 @@
 from functools import reduce
 from base64 import b64encode, b64decode
+import hashlib
 
 from django.core.urlresolvers import reverse
 from django.utils.encoding import force_text
@@ -90,6 +91,16 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
     digest = request_digest(request, bank_name, auth=auth, response=response)
 
     return the_key.verify(SHA.new(digest), b64decode(signature))
+
+
+def nordea_generate_mac(data, fields, mac_key):
+    mac_tokens = [data.get(field, '') for field in fields] + [mac_key]
+    mac_tokens = [token.encode('ascii') for token in mac_tokens]
+    mac_data = b'&'.join(mac_tokens) + b'&'
+
+    h = hashlib.new('md5')
+    h.update(mac_data)
+    return h.hexdigest().upper()
 
 
 def weight_generator():

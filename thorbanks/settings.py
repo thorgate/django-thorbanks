@@ -23,23 +23,26 @@ def configure():
             if type(data) != dict:
                 raise ImproperlyConfigured(u"Each bank in settings.BANKLINKS must correspond to dict with settings of that bank")
 
-            if 'PRIVATE_KEY' not in data:
-                raise ImproperlyConfigured(u"PRIVATE_KEY not found in settings for bank %s" % bank_name)
-            if 'PUBLIC_KEY' not in data:
-                raise ImproperlyConfigured(u"PUBLIC_KEY not found in settings for bank %s" % bank_name)
-            if 'SND_ID' not in data:
-                raise ImproperlyConfigured(u"SND_ID not found in settings for bank %s" % bank_name)
             if 'REQUEST_URL' not in data:
                 raise ImproperlyConfigured(u"REQUEST_URL not found in settings for bank %s" % bank_name)
 
-            if not os.path.isfile(data['PRIVATE_KEY']):
-                raise ImproperlyConfigured(u"Private key file %s for bank %s does not exist." % (data['PRIVATE_KEY'], bank_name))
+            protocol = get_link_protocol(bank_name)
+            if protocol == 'ipizza':
+                if 'PRIVATE_KEY' not in data:
+                    raise ImproperlyConfigured(u"PRIVATE_KEY not found in settings for bank %s" % bank_name)
+                if 'PUBLIC_KEY' not in data:
+                    raise ImproperlyConfigured(u"PUBLIC_KEY not found in settings for bank %s" % bank_name)
+                if 'SND_ID' not in data:
+                    raise ImproperlyConfigured(u"SND_ID not found in settings for bank %s" % bank_name)
 
-            if not os.path.isfile(data['PUBLIC_KEY']):
-                raise ImproperlyConfigured(u"Public key file %s for bank %s does not exist." % (data['PUBLIC_KEY'], bank_name))
+                if not os.path.isfile(data['PRIVATE_KEY']):
+                    raise ImproperlyConfigured(u"Private key file %s for bank %s does not exist." % (data['PRIVATE_KEY'], bank_name))
 
-
-configure()
+                if not os.path.isfile(data['PUBLIC_KEY']):
+                    raise ImproperlyConfigured(u"Public key file %s for bank %s does not exist." % (data['PUBLIC_KEY'], bank_name))
+            elif protocol == 'nordea':
+                if 'MAC_KEY' not in data:
+                    raise ImproperlyConfigured(u"MAC_KEY not found in settings for bank %s" % bank_name)
 
 
 def get_model(model_name):
@@ -76,6 +79,10 @@ def get_link_type(the_bank):
     return LINKS[the_bank]['TYPE']
 
 
+def get_link_protocol(the_bank):
+    return LINKS[the_bank].get('PROTOCOL', 'ipizza')
+
+
 def get_digest_counts_bytes(the_bank):
     """ Returns whether there should be byte- or character counts in digest used to calculate VK_MAC
         This matters when using UTF-8 multibyte characters.
@@ -98,4 +105,7 @@ def get_bank_choices():
     return [(the_bank,
              LINKS[the_bank].get('PRINTABLE_NAME', the_bank),
              LINKS[the_bank].get('IMAGE_PATH', the_bank),
-             LINKS[the_bank].get('ORDER', 99)) for the_bank in LINKS.iterkeys()]
+             LINKS[the_bank].get('ORDER', 99)) for the_bank in LINKS.keys()]
+
+
+configure()
