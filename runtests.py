@@ -1,7 +1,8 @@
+import os
 import sys
 
 from django.conf import settings
-import os
+
 
 settings.configure(
     DEBUG=True,
@@ -33,6 +34,10 @@ settings.configure(
         },
     },
 )
+
+
+import django
+django.setup()
 
 
 from django.test.runner import DiscoverRunner

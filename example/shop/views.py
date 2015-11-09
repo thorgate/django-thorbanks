@@ -1,16 +1,24 @@
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, FormView
 
-from shop.forms import OrderForm
-from shop.models import Order
-
-from thorbanks.views import create_payment_request
+from thorbanks.views import create_payment_request, create_auth_request, AuthResponseView, AuthError
 from thorbanks.utils import pingback_url
 
+from shop.forms import AuthForm, OrderForm
+from shop.models import Order
 
-class FrontpageView(CreateView):
+
+class FrontpageView(TemplateView):
     template_name = 'frontpage.html'
+
+
+class PaymentView(CreateView):
+    template_name = 'payment/index.html'
     form_class = OrderForm
 
     def form_valid(self, form):
@@ -38,9 +46,62 @@ class FrontpageView(CreateView):
 
 class PaymentSuccess(DetailView):
     model = Order
-    template_name = 'success.html'
+    template_name = 'payment/success.html'
 
 
 class PaymentFailed(DetailView):
     model = Order
-    template_name = 'failed.html'
+    template_name = 'payment/failed.html'
+
+
+class AuthenticationView(FormView):
+    template_name = 'auth/index.html'
+    form_class = AuthForm
+
+    def form_valid(self, form):
+        # Get urls of the order's success/failure pages
+        redirect_url = self.request.build_absolute_uri(reverse('auth-complete'))
+
+        # Create new auth request
+        bank_name = form.cleaned_data['bank_name']
+        auth_form = create_auth_request(
+            request=self.request,
+            bank_name=bank_name,
+            response_url=redirect_url,
+        )
+
+        # Finally, return the HTTP response which redirects the user to the bank
+        return HttpResponse(auth_form.redirect_html())
+
+
+class AuthenticationCompleteView(AuthResponseView, TemplateView):
+    template_name = 'auth/success.html'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super().dispatch(request, *args, **kwargs)
+
+        except AuthError:
+            return self.get(request, *args, **kwargs)
+
+    def validate(self, request):
+        if self.auth is None or self.data is None:
+            return None
+
+        # Check if the person code is present
+        if 'VK_USER_ID' not in self.data:
+            return None
+
+        return self.data
+
+    def get(self, request, *args, **kwargs):
+        data = self.validate(request)
+
+        if data is None:
+            self.template_name = 'auth/failed.html'
+        else:
+            self.template_name = 'auth/success.html'
+            print(data)
+
+        return self.render_to_response(data)
