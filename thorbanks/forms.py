@@ -1,3 +1,4 @@
+import hashlib
 from warnings import warn
 
 from django import forms
@@ -12,22 +13,12 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from thorbanks import settings
-from thorbanks.utils import create_signature
+from thorbanks.utils import create_signature, nordea_generate_mac
 from thorbanks.signals import transaction_started
 from thorbanks.utils import calculate_731_checksum
 
 
-class AuthRequest(forms.Form):
-    VK_SERVICE = forms.CharField(widget=forms.HiddenInput())
-    VK_VERSION = forms.CharField(widget=forms.HiddenInput())
-    VK_SND_ID = forms.CharField(widget=forms.HiddenInput())
-    VK_REPLY = forms.CharField(widget=forms.HiddenInput())
-    VK_RETURN = forms.CharField(widget=forms.HiddenInput())
-    VK_DATETIME = forms.CharField(widget=forms.HiddenInput())
-    VK_RID = forms.CharField(widget=forms.HiddenInput())
-    VK_ENCODING = forms.CharField(widget=forms.HiddenInput())
-    VK_MAC = forms.CharField(widget=forms.HiddenInput(), required=False)
-
+class AuthRequestBase(forms.Form):
     def __init__(self, bank_name, redirect_to, response_url, *args, **kwargs):
         self.auth = settings.get_model('Authentication')()
         self.auth.bank_name = bank_name
@@ -35,31 +26,27 @@ class AuthRequest(forms.Form):
         self.auth.redirect_on_failure = redirect_to
         self.auth.save()
 
-        initial = {
-            'VK_RID': self.auth.pk,
-            'VK_SERVICE': '4011',
-            'VK_VERSION': '008',
-            'VK_REPLY': '3012',
-            'VK_SND_ID': settings.get_snd_id(bank_name),
-            'VK_RETURN': response_url,
-            'VK_DATETIME': self.auth.created.strftime('%Y-%m-%dT%H:%M:%S%z'),
-            'VK_ENCODING': settings.get_encoding(bank_name)
-        }
+        initial = self.prepare(bank_name, redirect_to, response_url, *args, **kwargs)
 
-        super(AuthRequest, self).__init__(initial, *args, **kwargs)
+        super(AuthRequestBase, self).__init__(initial, *args, **kwargs)
 
-        if self.is_valid():
-            mac = create_signature(self.cleaned_data, self.auth.bank_name, auth=True)
-            self.data['VK_MAC'] = mac
-            if not self.is_valid():
-                raise RuntimeError("signature is invalid")
-        else:
+        if not self.is_valid():
             raise RuntimeError("invalid initial data")
+
+        self.finalize()
+        if not self.is_valid():
+            raise RuntimeError("signature is invalid")
+
+    def prepare(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def finalize(self):
+        raise NotImplementedError
 
     def redirect_html(self):
         """ Redirection html """
-        html = '<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">' % (self.get_request_url(),
-                                                                                                    self.get_encoding())
+        html = '<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">' % (
+            self.get_request_url(), self.get_encoding())
 
         for field in self:
             html += force_text(field) + "\n"
@@ -77,6 +64,86 @@ class AuthRequest(forms.Form):
 
     def get_encoding(self):
         return settings.get_encoding(self.auth.bank_name)
+
+
+class IPizzaAuthRequest(AuthRequestBase):
+    VK_SERVICE = forms.CharField(widget=forms.HiddenInput())
+    VK_VERSION = forms.CharField(widget=forms.HiddenInput())
+    VK_SND_ID = forms.CharField(widget=forms.HiddenInput())
+    VK_REPLY = forms.CharField(widget=forms.HiddenInput())
+    VK_RETURN = forms.CharField(widget=forms.HiddenInput())
+    VK_DATETIME = forms.CharField(widget=forms.HiddenInput())
+    VK_RID = forms.CharField(widget=forms.HiddenInput())
+    VK_ENCODING = forms.CharField(widget=forms.HiddenInput())
+    VK_MAC = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    def prepare(self, bank_name, redirect_to, response_url, *args, **kwargs):
+        initial = {
+            'VK_RID': self.auth.pk,
+            'VK_SERVICE': '4011',
+            'VK_VERSION': '008',
+            'VK_REPLY': '3012',
+            'VK_SND_ID': settings.get_snd_id(bank_name),
+            'VK_RETURN': response_url,
+            'VK_DATETIME': self.auth.created.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'VK_ENCODING': settings.get_encoding(bank_name)
+        }
+        return initial
+
+    def finalize(self):
+        mac = create_signature(self.cleaned_data, self.auth.bank_name, auth=True)
+        self.data['VK_MAC'] = mac
+
+
+class NordeaAuthRequest(AuthRequestBase):
+    A01Y_ACTION_ID = forms.CharField(widget=forms.HiddenInput())
+    A01Y_VERS = forms.CharField(widget=forms.HiddenInput())
+    A01Y_RCVID = forms.CharField(widget=forms.HiddenInput())
+    A01Y_LANGCODE = forms.CharField(widget=forms.HiddenInput())
+    A01Y_STAMP = forms.CharField(widget=forms.HiddenInput())
+    A01Y_IDTYPE = forms.CharField(widget=forms.HiddenInput())
+    A01Y_RETLINK = forms.CharField(widget=forms.HiddenInput())
+    A01Y_CANLINK = forms.CharField(widget=forms.HiddenInput())
+    A01Y_REJLINK = forms.CharField(widget=forms.HiddenInput())
+    A01Y_KEYVERS = forms.CharField(widget=forms.HiddenInput())
+    A01Y_ALG = forms.CharField(widget=forms.HiddenInput())
+    A01Y_MAC = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    def prepare(self, bank_name, redirect_to, response_url, *args, **kwargs):
+        initial = {
+            'A01Y_ACTION_ID': '701',
+            'A01Y_VERS': '0002',
+            'A01Y_RCVID': settings.get_snd_id(bank_name),
+            'A01Y_LANGCODE': 'ET',
+            'A01Y_STAMP': self.auth.pk,
+            'A01Y_IDTYPE': '02',
+            'A01Y_RETLINK': response_url,
+            'A01Y_CANLINK': response_url,
+            'A01Y_REJLINK': response_url,
+            'A01Y_KEYVERS': '0001',     # TODO: support multiple keys
+            'A01Y_ALG': '02',           # We use SHA1 to calculate MAC
+        }
+        return initial
+
+    def finalize(self):
+        mac_token_fields = (
+            'A01Y_ACTION_ID',
+            'A01Y_VERS',
+            'A01Y_RCVID',
+            'A01Y_LANGCODE',
+            'A01Y_STAMP',
+            'A01Y_IDTYPE',
+            'A01Y_RETLINK',
+            'A01Y_CANLINK',
+            'A01Y_REJLINK',
+            'A01Y_KEYVERS',
+            'A01Y_ALG',
+        )
+        link_config = settings.LINKS[self.auth.bank_name]
+        mac_key = link_config['MAC_KEY']
+        mac = nordea_generate_mac(self.cleaned_data, mac_token_fields, mac_key)
+
+        self.data['A01Y_MAC'] = mac
 
 
 class PaymentRequest(forms.Form):
