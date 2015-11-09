@@ -126,6 +126,15 @@ BANKLINKS = {
         'IMAGE_PATH': 'danske.png',
         'ORDER': 3,
     },
+    'nordea': {
+        'PRINTABLE_NAME': 'Nordea',
+        'REQUEST_URL': 'https://netbank.nordea.com/pnbeidtest/eid.jsp',
+        'SND_ID': '87654321',
+        'MAC_KEY': 'LEHTI',
+        'TYPE': 'banklink',
+        'PROTOCOL': 'nordea',
+        'ORDER': 4,
+    },
 }
 # Here you can customize where the bank logos are (used by the PaymentFormMixin). This is relative to STATIC_URL and
 #  must end with slash
