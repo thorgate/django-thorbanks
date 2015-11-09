@@ -95,7 +95,7 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
 
 def nordea_generate_mac(data, fields, mac_key):
     mac_tokens = [data.get(field, '') for field in fields] + [mac_key]
-    mac_tokens = [token.encode('ascii') for token in mac_tokens]
+    mac_tokens = [token.encode('iso-8859-1') for token in mac_tokens]
     mac_data = b'&'.join(mac_tokens) + b'&'
 
     h = hashlib.new('md5')

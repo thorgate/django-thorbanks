@@ -1,8 +1,8 @@
+import logging
+
 from django.utils.crypto import constant_time_compare
 from django.utils.decorators import method_decorator
 from django.views.generic import View
-import logging
-
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404
@@ -184,8 +184,9 @@ class AuthResponseView(View):
         # Set proper encoding (Nordea supports only ISO-8859-1) and get the data again (this time in correct encoding)
         request.encoding = 'ISO-8859-1'
 
-        # We have to manually replace POST after changing encoding because of a Django bug (?)
+        # We have to manually replace GET and POST after changing encoding because of a Django bug (?)
         request.POST = QueryDict(request.body, encoding=request.encoding)
+        request.GET = QueryDict(request.META.get('QUERY_STRING', ''), encoding=request.encoding)
         self.data = get_request_data(request)
         self.data = self.data.dict()
 
