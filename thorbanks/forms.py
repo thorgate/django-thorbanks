@@ -121,7 +121,7 @@ class NordeaAuthRequest(AuthRequestBase):
             'A01Y_CANLINK': response_url,
             'A01Y_REJLINK': response_url,
             'A01Y_KEYVERS': '0001',     # TODO: support multiple keys
-            'A01Y_ALG': '01',           # MD5, because Nordea's production server doesn't support SHA1
+            'A01Y_ALG': '02',           # We use SHA1 to calculate MAC
         }
         return initial
 
