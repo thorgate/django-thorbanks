@@ -43,23 +43,23 @@ def response(request):
     transaction = get_object_or_404(klass, pk=data['VK_STAMP'])
 
     # Set proper encoding and get the data again (this time in correct encoding)
-    request.encoding = settings.get_encoding(transaction.bank_name)
+    request.encoding = 'UTF-8'
 
     # We have to manually replace POST after changing encoding because of a Django bug (?)
     request.POST = QueryDict(request.body, encoding=request.encoding)
     data = get_request_data(request)
 
-    signature_valid = verify_signature(data, transaction.bank_name, data['VK_MAC'])
+    signature_valid = verify_signature(data, transaction.bank_name, data['VK_MAC'], response=True)
     if not signature_valid:
         raise PaymentError("Invalid signature. ")
 
-    if data['VK_SERVICE'] == '1101':
+    if data['VK_SERVICE'] == '1111':
         if transaction.status == klass.STATUS_PENDING:
             # Mark purchase as complete
             transaction.status = klass.STATUS_COMPLETED
             transaction.save()
             transaction_succeeded.send(klass, transaction=transaction)
-    elif data['VK_SERVICE'] == '1901':
+    elif data['VK_SERVICE'] == '1911':
         if transaction.status == klass.STATUS_PENDING:
             # Mark purchase as failed
             transaction.status = klass.STATUS_FAILED
@@ -74,9 +74,10 @@ def response(request):
     if data['VK_AUTO'] == 'Y':
         # This is automatic pingback from the bank - send simple 200 response.
         return HttpResponse("request handled")
+
     else:
         # This request is from the user after being redirected from the bank to our server. Redirect her further.
-        if data['VK_SERVICE'] == '1101':
+        if data['VK_SERVICE'] == '1111':
             url = transaction.redirect_after_success
         else:
             url = transaction.redirect_on_failure
@@ -138,7 +139,7 @@ class AuthResponseView(View):
         auth = get_object_or_404(klass, pk=self.data.get('VK_RID', None))
 
         # Set proper encoding and get the data again (this time in correct encoding)
-        request.encoding = settings.get_encoding(auth.bank_name)
+        request.encoding = 'UTF-8'
 
         # We have to manually replace POST after changing encoding because of a Django bug (?)
         request.POST = QueryDict(request.body, encoding=request.encoding)

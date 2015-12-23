@@ -1,3 +1,9 @@
-Payment of order {{ order.id }} successful :-)
+{% extends "base.html" %}
 
-Complete: {{ order.is_paid }}
+{% block content %}
+
+    Payment of order {{ order.id }} successful :-)
+
+    Complete: {{ order.is_paid }}
+
+{% endblock %}

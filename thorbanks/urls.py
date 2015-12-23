@@ -1,6 +1,6 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 
-urlpatterns = patterns('thorbanks.views',
-    url(r'^thorbanks_response/$', 'response', name='thorbanks_response'),
-)
+urlpatterns = [
+    url(r'^thorbanks_response/$', 'thorbanks.views.response', name='thorbanks_response'),
+]

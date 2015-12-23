@@ -1,9 +1,7 @@
-import hashlib
 from warnings import warn
 
 from django import forms
 from django.conf import settings as django_settings
-from django.forms.util import ErrorList
 from django.forms.widgets import RadioFieldRenderer
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -31,17 +29,17 @@ class AuthRequestBase(forms.Form):
         super(AuthRequestBase, self).__init__(initial, *args, **kwargs)
 
         if not self.is_valid():
-            raise RuntimeError("invalid initial data")
+            raise RuntimeError("invalid initial data")  # pragma no cover
 
         self.finalize()
         if not self.is_valid():
-            raise RuntimeError("signature is invalid")
+            raise RuntimeError("signature is invalid")  # pragma no cover
 
     def prepare(self, *args, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma no cover
 
     def finalize(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma no cover
 
     def redirect_html(self):
         """ Redirection html """
@@ -63,7 +61,7 @@ class AuthRequestBase(forms.Form):
         return settings.get_request_url(self.auth.bank_name)
 
     def get_encoding(self):
-        return settings.get_encoding(self.auth.bank_name)
+        return 'UTF-8'
 
 
 class IPizzaAuthRequest(AuthRequestBase):
@@ -86,7 +84,7 @@ class IPizzaAuthRequest(AuthRequestBase):
             'VK_SND_ID': settings.get_snd_id(bank_name),
             'VK_RETURN': response_url,
             'VK_DATETIME': self.auth.created.strftime('%Y-%m-%dT%H:%M:%S%z'),
-            'VK_ENCODING': settings.get_encoding(bank_name)
+            'VK_ENCODING': self.get_encoding(),
         }
         return initial
 
@@ -146,81 +144,40 @@ class NordeaAuthRequest(AuthRequestBase):
         self.data['A01Y_MAC'] = mac
 
 
-class PaymentRequest(forms.Form):
-    """ Creates payment request and Transaction object.
-
-    It also acts as a facade through which transaction object and HTTP redirect can be retrieved.
-    """
-    VK_SERVICE = forms.CharField(widget=forms.HiddenInput())
-    VK_VERSION = forms.CharField(widget=forms.HiddenInput())
-    VK_SND_ID = forms.CharField(widget=forms.HiddenInput())
-    VK_STAMP = forms.CharField(widget=forms.HiddenInput())
-    VK_AMOUNT = forms.CharField(widget=forms.HiddenInput())
-    VK_CURR = forms.CharField(widget=forms.HiddenInput())
-    VK_REF = forms.CharField(widget=forms.HiddenInput())
-    VK_MSG = forms.CharField(widget=forms.HiddenInput())
-    VK_MAC = forms.CharField(widget=forms.HiddenInput(), required=False)
-    VK_RETURN = forms.CharField(widget=forms.HiddenInput())
-    VK_LANG = forms.CharField(widget=forms.HiddenInput())
-    VK_ENCODING = forms.CharField(widget=forms.HiddenInput())
-    VK_CHARSET = forms.CharField(widget=forms.HiddenInput())
-
+class PaymentRequestBase(forms.Form):
     def __init__(self, *args, **kwargs):
-        if kwargs['bank_name'] == 'danske':
-            # Note: This should also strip everything that isn't ISO-8859-1
-            kwargs['message'] = kwargs['message'].replace(':', '')
-
-        initial = {}
         self.transaction = settings.get_model('Transaction')()
         self.transaction.bank_name = kwargs['bank_name']
         self.transaction.description = kwargs['message']
-        self.transaction.amount = initial['VK_AMOUNT'] = kwargs['amount']
-        self.transaction.currency = initial['VK_CURR'] = kwargs['currency']
-        self.transaction.message = initial['VK_MSG'] = kwargs['message']
-        initial['VK_ENCODING'] = settings.get_encoding(self.transaction.bank_name)
-        initial['VK_CHARSET'] = initial['VK_ENCODING']
-        initial['VK_RETURN'] = kwargs.get('url')
-        initial['VK_SERVICE'] = '1002'
-        initial['VK_VERSION'] = '008'
-        initial['VK_LANG'] = kwargs.get('language', 'EST')
-        initial['VK_SND_ID'] = settings.get_snd_id(self.transaction.bank_name)
+        self.transaction.amount = round(kwargs['amount'], 2)
+        self.transaction.currency = kwargs['currency']
+        self.transaction.message = kwargs['message']
+
         self.transaction.redirect_after_success = kwargs['redirect_to']
         self.transaction.redirect_on_failure = kwargs['redirect_on_failure']
         self.transaction.save()
 
         transaction_started.send(settings.get_model('Transaction'), transaction=self.transaction)
-        initial['VK_REF'] = calculate_731_checksum(self.transaction.pk)
-        initial['VK_STAMP'] = self.transaction.pk
 
-        super(PaymentRequest, self).__init__(initial, *args)
+        initial = self.prepare(self.transaction, kwargs['url'])
 
-        if self.is_valid():
-            mac = create_signature(self.cleaned_data, self.transaction.bank_name)
-            self.data['VK_MAC'] = mac
-            if not self.is_valid():
-                raise RuntimeError("signature is invalid")
-        else:
+        super(PaymentRequestBase, self).__init__(initial, *args)
+
+        if not self.is_valid():
             raise RuntimeError("invalid initial data")
 
-        if 'pangalink.net' in self.get_request_url():
-            self.handle_exceptions()
+        self.finalize()
+        if not self.is_valid():
+            raise RuntimeError("signature is invalid")
 
-    def handle_exceptions(self):
-        """ This ensures that we send correct data for certain banks to pangalink.net which
-            is more strict than the real banklink endpoints.
-        """
-        if self.transaction.bank_name == 'swedbank':
-            # Swedbank uses VK_ENCODING instead of VK_CHARSET
-            del self.fields['VK_CHARSET']
-        elif self.transaction.bank_name == 'seb':
-            # SEB uses VK_CHARSET instead of VK_ENCODING
-            del self.fields['VK_ENCODING']
-        elif self.transaction.bank_name == 'danske':
-            del self.fields['VK_CHARSET']
-            del self.fields['VK_ENCODING']
+    @classmethod
+    def prepare(cls, transaction, url, language='EST'):
+        raise NotImplementedError
+
+    def finalize(self):
+        raise NotImplementedError
 
     def redirect_html(self):
-        """ Hanzanet redirection html"""
         html = u'<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">' % (
             self.get_request_url(), self.get_encoding())
         for field in self:
@@ -239,8 +196,7 @@ class PaymentRequest(forms.Form):
         html += '</form>'
         return mark_safe(html)
 
-    def as_html(self, with_submit=False, id="banklink_payment_form", submit_value="submit" ):
-        """ return transaction form for redirect to HanzaNet """
+    def as_html(self, with_submit=False, id="banklink_payment_form", submit_value="submit"):
         warn("deprecated", DeprecationWarning)
         html = u'<form action="%s" method="POST" id="%s">' % (settings.get_request_url(self.transaction.bank_name), id)
         for field in self:
@@ -254,13 +210,60 @@ class PaymentRequest(forms.Form):
         return settings.get_request_url(self.transaction.bank_name)
 
     def get_encoding(self):
-        return settings.get_encoding(self.transaction.bank_name)
+        return 'UTF-8'
 
     def get_redirect_response_html(self):
         return render_to_string("thorbanks/request.html", {'form': self})
 
     def get_redirect_response(self):
         return HttpResponse(self.get_redirect_response_html())
+
+
+class PaymentRequest(PaymentRequestBase):
+    """ Creates payment request and Transaction object.
+
+    It also acts as a facade through which transaction object and HTTP redirect can be retrieved.
+    """
+    VK_SERVICE = forms.CharField(widget=forms.HiddenInput())
+    VK_VERSION = forms.CharField(widget=forms.HiddenInput())
+    VK_SND_ID = forms.CharField(widget=forms.HiddenInput())
+    VK_STAMP = forms.CharField(widget=forms.HiddenInput())
+    VK_AMOUNT = forms.CharField(widget=forms.HiddenInput())
+    VK_CURR = forms.CharField(widget=forms.HiddenInput())
+    VK_REF = forms.CharField(widget=forms.HiddenInput())
+    VK_MSG = forms.CharField(widget=forms.HiddenInput())
+    VK_RETURN = forms.CharField(widget=forms.HiddenInput())
+    VK_CANCEL = forms.CharField(widget=forms.HiddenInput())
+    VK_DATETIME = forms.CharField(widget=forms.HiddenInput())
+    VK_MAC = forms.CharField(widget=forms.HiddenInput(), required=False)
+    VK_LANG = forms.CharField(widget=forms.HiddenInput())
+    VK_ENCODING = forms.CharField(widget=forms.HiddenInput())
+
+    @classmethod
+    def prepare(cls, transaction, url, language='EST'):
+        assert language in ['EST', 'ENG', 'RUS']
+
+        return {
+            'VK_SERVICE': '1012',
+            'VK_VERSION': '008',
+            'VK_ENCODING': 'UTF-8',
+
+            'VK_DATETIME': transaction.created.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'VK_RETURN': url,
+            'VK_CANCEL': url,
+            'VK_LANG': language,
+            'VK_SND_ID': settings.get_snd_id(transaction.bank_name),
+
+            'VK_STAMP': transaction.pk,
+            'VK_REF': calculate_731_checksum(transaction.pk),
+
+            'VK_AMOUNT': transaction.amount,
+            'VK_CURR': transaction.currency,
+            'VK_MSG': transaction.message,
+        }
+
+    def finalize(self):
+        self.data['VK_MAC'] = create_signature(self.cleaned_data, self.transaction.bank_name)
 
 
 class PaymentFormMixin(object):
@@ -301,6 +304,9 @@ class PaymentFormMixin(object):
 
         super(PaymentFormMixin, self).__init__(*args, **kwargs)
 
+        if not self.fields['bank_name'].required:
+            raise NotImplementedError('bank_name field must be required')
+
         self.fields['bank_name'].choices = self.get_payment_method_choices(payment_methods)
         self.fields['bank_name'].error_messages['required'] = _('You have to select a method of payment.')
 
@@ -326,15 +332,6 @@ class PaymentFormMixin(object):
     def get_bank_image_path(self, image_name):
         logos_dir = getattr(django_settings, 'BANKLINK_LOGO_PATH', 'img/payment/')
         return '%s%s%s' % (django_settings.STATIC_URL, logos_dir, image_name)
-
-    def clean(self):
-        _cleaned = self.cleaned_data
-
-        if not _cleaned['bank_name']:
-            self._errors['bank_name'] = self._errors.get('bank_name', ErrorList())
-            self._errors['bank_name'].append(self.fields['bank_name'].error_messages['required'])
-
-        return _cleaned
 
     def get_bank_id(self):
         if not self.cleaned_data:

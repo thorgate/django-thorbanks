@@ -1,0 +1,13 @@
+# Development needs the following packages
+
+pytest
+coverage
+coveralls
+pytest-cov
+pytest-django
+pytest-xdist
+pytest-timeout
+flake8
+mock>=1.0.1
+tox>=1.7.0
+pytest-selenium

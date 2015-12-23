@@ -30,7 +30,7 @@ def banklink_success_callback(sender, transaction, **kwargs):
 
         logging.info("Transaction %d purchase completed", transaction.id)
 
-    except Exception as e:
+    except Exception:
         # *WARNING*:
         # This is a very bad exception. It means the user gave us money, but for some reason we
         # couldn't give him the items(complete the purchase)

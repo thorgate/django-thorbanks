@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import sys
 
@@ -33,7 +35,7 @@ setup(
     ]},
     include_package_data=True,
     install_requires=[
-        'Django',
+        'Django>=1.4,<1.10',
         'PyCrypto',
     ],
     classifiers=[
