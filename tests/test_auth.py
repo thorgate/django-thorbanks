@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import random
 import pytest
+import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -9,13 +11,16 @@ from selenium.webdriver.support import expected_conditions
 
 from django.core.urlresolvers import reverse
 
-from tests.utils import select_radio, click, IPIZZA_BANKS, ready, set_input_text, assert_no_errors
+from tests.utils import select_radio, click, IPIZZA_BANKS, ready, set_input_text, assert_no_errors, IS_TRAVIS, TIMEOUT
 
 
 @pytest.mark.parametrize("bank_name", IPIZZA_BANKS)
 @pytest.mark.django_db
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 def test_auth_flow(bank_name, live_server, selenium):
+    if IS_TRAVIS:
+        time.sleep(1 + random.uniform(0.5, 2.3))  # Give server time to start up
+
     auth_url = '%s%s' % (live_server.url, reverse('auth'))
 
     # Get the auth page
