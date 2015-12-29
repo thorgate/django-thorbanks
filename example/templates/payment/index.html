@@ -1,8 +1,14 @@
-<h1>Thorbanks demo - payment</h1>
-<a href="{% url 'frontpage' %}">Back to frontpage</a>
+{% extends "base.html" %}
 
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Pay!">
-</form>
+{% block content %}
+
+    <h1>Thorbanks demo - payment</h1>
+    <a href="{% url 'frontpage' %}">Back to frontpage</a>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Pay!">
+    </form>
+
+{% endblock %}

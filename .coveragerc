@@ -1,12 +1,11 @@
 [run]
-branch = False
+branch = True
 source =
-    thorbanks
+    thorbanks/
 
 omit =
     */migrations/*
     setup.py
-    runtests.py
     example
 
 [html]

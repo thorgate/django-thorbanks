@@ -1,6 +1,10 @@
 *.pyc
+db.sqlite3
+
 .sass-cache/
 .idea/
+.cache/
+.tox/
 django_thorbanks.egg-info
 build/
 dist/

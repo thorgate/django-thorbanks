@@ -55,11 +55,10 @@ class AbstractAuthentication(models.Model):
     raw_response = models.TextField(blank=True)
 
     def __str__(self):
-        return "Authentication %s - %s [%s]" % (self.id, self.bank_name, self.get_status_display())
+        return "Authentication %s - %s [%s]" % (self.id, self.bank_name, self.get_status_display())  # pragma no cover
 
     class Meta:
         abstract = True
         app_label = 'thorbanks'
         verbose_name = _("Authentication")
         ordering = ['-last_modified']
-

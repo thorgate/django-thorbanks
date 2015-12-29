@@ -1,0 +1,27 @@
+language: python
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+install:
+- pip install tox
+- pip install coveralls
+script:
+- tox
+env:
+  matrix:
+  - TOXENV=py27-django14
+  - TOXENV=py27-django1410
+  - TOXENV=py27-django15
+  - TOXENV=py27-django16
+  - TOXENV=py27-django167
+  - TOXENV=py27-django17
+  - TOXENV=py27-django18
+  - TOXENV=py27-django19
+  - TOXENV=py34-django16
+  - TOXENV=py34-django167
+  - TOXENV=py34-django17
+  - TOXENV=py34-django18
+  - TOXENV=py34-django19
+  - TOXENV=flake8
+  - TOXENV=coverage
+after_success: coveralls

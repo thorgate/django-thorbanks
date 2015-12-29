@@ -1,6 +1,10 @@
+import sys
+
+from django import http
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
+from django.views.debug import ExceptionReporter
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
@@ -80,7 +84,7 @@ class AuthenticationCompleteView(AuthResponseView, TemplateView):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         try:
-            return super().dispatch(request, *args, **kwargs)
+            return super(AuthenticationCompleteView, self).dispatch(request, *args, **kwargs)
 
         except AuthError:
             return self.get(request, *args, **kwargs)
@@ -104,3 +108,17 @@ class AuthenticationCompleteView(AuthResponseView, TemplateView):
             self.template_name = 'auth/success.html'
 
         return self.render_to_response(data)
+
+
+def show_server_error(request):
+    """
+    500 error handler to show Django default 500 template
+    with nice error information and traceback.
+    Useful in testing, if you can't set DEBUG=True.
+
+    Templates: `500.html`
+    Context: sys.exc_info() results
+     """
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    error = ExceptionReporter(request, exc_type, exc_value, exc_traceback)
+    return http.HttpResponseServerError(error.get_traceback_html())

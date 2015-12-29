@@ -1,2 +1,3 @@
 include README.md
 recursive-include thorbanks *.html *.png *.gif *js *.css *jpg *jpeg *svg *py *pem
+recursive-exclude thorbanks **/migrations/*

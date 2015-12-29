@@ -19,13 +19,27 @@ def get_ordered_request(request, auth=False, response=False):
         return target
 
     if not auth:
-        expected_values = (
-            'VK_SERVICE', 'VK_VERSION', 'VK_SND_ID',
-            'VK_REC_ID', 'VK_STAMP', 'VK_T_NO',
-            'VK_AMOUNT', 'VK_CURR', 'VK_REC_ACC',
-            'VK_REC_NAME', 'VK_SND_ACC', 'VK_SND_NAME',
-            'VK_REF', 'VK_MSG', 'VK_T_DATE',
-        )
+        if response:
+            expected_values = (
+                'VK_SERVICE', 'VK_VERSION', 'VK_SND_ID',
+                'VK_REC_ID', 'VK_STAMP', 'VK_T_NO',
+
+                'VK_AMOUNT', 'VK_CURR',
+
+                'VK_REC_ACC', 'VK_REC_NAME',
+
+                'VK_SND_ACC', 'VK_SND_NAME',
+
+                'VK_REF', 'VK_MSG', 'VK_T_DATETIME',
+            )
+
+        else:
+            expected_values = (
+                'VK_SERVICE', 'VK_VERSION', 'VK_SND_ID',
+                'VK_STAMP', 'VK_AMOUNT', 'VK_CURR',
+                'VK_REF', 'VK_MSG', 'VK_RETURN',
+                'VK_CANCEL', 'VK_DATETIME',
+            )
 
     else:
         if response:
@@ -56,23 +70,26 @@ def request_digest(request, bank_name, auth=False, response=False):
     request = get_ordered_request(request, auth=auth, response=response)
     digest = ''
     for value in request:
-        value_len = len(value.encode('utf-8')) if settings.get_digest_counts_bytes(bank_name) else len(value)
+        value_len = len(value)
         digest += force_text(value_len).rjust(3, '0')
         digest += force_text(value)
-    return digest.encode(settings.get_encoding(bank_name))
+    return digest.encode('UTF-8')
+
+
+def get_pkey(bank_name):
+    with open(settings.get_private_key(bank_name)) as handle:
+        private_key = RSA.importKey(handle.read())
+        handle.close()
+
+    return PKCS1_v1_5.new(private_key)
 
 
 def create_signature(request, bank_name, auth=False):
     """
         sign BankLink request in dict format with private_key
     """
-    with open(settings.get_private_key(bank_name)) as handle:
-        private_key = RSA.importKey(handle.read())
-        handle.close()
-
-    the_key = PKCS1_v1_5.new(private_key)
     digest = request_digest(request, bank_name, auth=auth)
-    key_binary = the_key.sign(SHA.new(digest))
+    key_binary = get_pkey(bank_name).sign(SHA.new(digest))
 
     return b64encode(key_binary)
 
@@ -115,7 +132,7 @@ def calculate_731_checksum(number):
     # Check if number is integer, then cast to string
     number = str(int(number))[::-1]
     gen = weight_generator()
-    weight_sum = reduce(lambda x,y: x+int(y)*next(gen), number, 0)
+    weight_sum = reduce(lambda x, y: x+int(y)*next(gen), number, 0)
     checksum = (10 - weight_sum % 10) % 10
     return int(number[::-1] + str(checksum))
 
