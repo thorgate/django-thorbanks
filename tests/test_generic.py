@@ -9,6 +9,7 @@ import pytest
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
+from django.utils import six
 
 try:
     from django.utils.encoding import force_bytes
@@ -219,6 +220,6 @@ def test_payment_form_html_decode_error():
         url="http://example.com",
     )
 
-    print(form.as_html())  # TODO: Remove once we drop the method
-    print(form.redirect_html())
-    print(form.submit_button())
+    assert isinstance(form.submit_button(), six.text_type)
+    assert isinstance(form.redirect_html(), six.text_type)
+    assert isinstance(form.as_html(), six.text_type)  # TODO: Remove once we drop the method
