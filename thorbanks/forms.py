@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from warnings import warn
 
 from django import forms
@@ -178,29 +180,29 @@ class PaymentRequestBase(forms.Form):
         raise NotImplementedError
 
     def redirect_html(self):
-        html = u'<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">' % (
+        html = '<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">' % (
             self.get_request_url(), self.get_encoding())
         for field in self:
-            html += str(field) + u"\n"
-        html += u'</form>'
-        html += u'''<script type="text/javascript">
+            html += force_text(field) + u"\n"
+        html += '</form>'
+        html += '''<script type="text/javascript">
                     document.forms['banklink_redirect_url'].submit();
                     </script>'''
         return mark_safe(html)
 
     def submit_button(self, value=u"Make the payment"):
-        html = u'<form action="%s" method="POST">' % (settings.get_request_url(self.transaction.bank_name))
+        html = '<form action="%s" method="POST">' % (settings.get_request_url(self.transaction.bank_name))
         for field in self:
-            html += str(field) + u"\n"
+            html += force_text(field) + u"\n"
         html += '<input type="submit" value="%s" />' % value
         html += '</form>'
         return mark_safe(html)
 
     def as_html(self, with_submit=False, id="banklink_payment_form", submit_value="submit"):
         warn("deprecated", DeprecationWarning)
-        html = u'<form action="%s" method="POST" id="%s">' % (settings.get_request_url(self.transaction.bank_name), id)
+        html = '<form action="%s" method="POST" id="%s">' % (settings.get_request_url(self.transaction.bank_name), id)
         for field in self:
-            html += str(field) + u"\n"
+            html += force_text(field) + u"\n"
         if with_submit:
             html += '<input type="submit" value="%s"/>' % (submit_value, )
         html += '</form>'
@@ -281,8 +283,8 @@ class PaymentFormMixin(object):
     class BankNameFieldRenderer(RadioFieldRenderer):
         """ Augmented RadioFieldRenderer that lets us use out own CSS class.
         """
-        UL_HTML = u'<ul class="payment-options clearfix">%s</ul>'
-        LI_HTML = u'<li>%s</li>'
+        UL_HTML = '<ul class="payment-options clearfix">%s</ul>'
+        LI_HTML = '<li>%s</li>'
 
         def field_render(self, field):
             if 'id' in field.attrs:
@@ -291,7 +293,7 @@ class PaymentFormMixin(object):
                 label_for = ''
             choice_label = conditional_escape(force_text(field.choice_label))
 
-            return mark_safe(u'%s <label%s>%s</label>' % (field.tag(), label_for, choice_label))
+            return mark_safe('%s <label%s>%s</label>' % (field.tag(), label_for, choice_label))
 
         def render(self):
             return mark_safe(self.UL_HTML % '\n'.join(

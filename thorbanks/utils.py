@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from functools import reduce
 from base64 import b64encode, b64decode
 import hashlib
@@ -132,7 +134,7 @@ def calculate_731_checksum(number):
     # Check if number is integer, then cast to string
     number = str(int(number))[::-1]
     gen = weight_generator()
-    weight_sum = reduce(lambda x, y: x+int(y)*next(gen), number, 0)
+    weight_sum = reduce(lambda x, y: x + int(y) * next(gen), number, 0)
     checksum = (10 - weight_sum % 10) % 10
     return int(number[::-1] + str(checksum))
 

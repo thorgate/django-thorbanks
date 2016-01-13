@@ -8,6 +8,7 @@ pytest-django
 pytest-xdist
 pytest-timeout
 flake8
+flake8-future-import
 mock>=1.0.1
 tox>=1.7.0
 pytest-selenium

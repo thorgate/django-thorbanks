@@ -1,7 +1,9 @@
+from __future__ import unicode_literals
+
 from django.conf.urls import url, include
 
-from shop.views import FrontpageView, PaymentView, PaymentSuccess, PaymentFailed, \
-    AuthenticationView, AuthenticationCompleteView
+from shop.views import (FrontpageView, PaymentView, PaymentSuccess, PaymentFailed,
+                        AuthenticationView, AuthenticationCompleteView)
 
 
 urlpatterns = [

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from thorbanks import settings
 from thorbanks.abstract_models import AbstractTransaction, AbstractAuthentication
 from thorbanks.loading import is_model_registered
