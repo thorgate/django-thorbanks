@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 from django.utils.crypto import constant_time_compare

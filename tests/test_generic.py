@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import random
 from base64 import b64encode
+from Crypto.Hash import SHA
 
 import pytest
-from Crypto.Hash import SHA
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
+from django.utils import six
 
 try:
     from django.utils.encoding import force_bytes
@@ -201,3 +206,20 @@ def test_payment_result(settings):
 
     assert request_digest(request.cleaned_data, request.transaction.bank_name) == expected_digest
     assert request['VK_MAC'].value() == b64encode(get_pkey('swedbank').sign(SHA.new(expected_digest)))
+
+
+@pytest.mark.django_db
+def test_payment_form_html_decode_error():
+    form = PaymentRequest(
+        bank_name="swedbank",
+        amount=20.40,
+        currency='EUR',
+        redirect_to="http://example.com",
+        redirect_on_failure="http://example.com",
+        message="Pangalink: 12345 (müsli)",
+        url="http://example.com",
+    )
+
+    assert isinstance(form.submit_button(), six.text_type)
+    assert isinstance(form.redirect_html(), six.text_type)
+    assert isinstance(form.as_html(), six.text_type)  # TODO: Remove once we drop the method
