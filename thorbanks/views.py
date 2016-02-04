@@ -138,7 +138,7 @@ class AuthResponseView(View):
 
     def handle_ipizza(self, request):
         klass = settings.get_model('Authentication')
-        auth = get_object_or_404(klass, pk=self.data.get('VK_RID', None))
+        auth = get_object_or_404(klass, pk=self.data.get('VK_NONCE', None))
 
         # Set proper encoding and get the data again (this time in correct encoding)
         request.encoding = 'UTF-8'
@@ -153,7 +153,7 @@ class AuthResponseView(View):
 
         self.data = self.data.dict()
 
-        if self.data['VK_SERVICE'] == '3012':
+        if self.data['VK_SERVICE'] == '3013':
             if auth.status == klass.STATUS_PENDING:
                 # Mark auth as complete
                 auth.raw_response = self.data
@@ -170,7 +170,7 @@ class AuthResponseView(View):
                 auth_failed.send(klass, auth=auth)
 
         # This request is from the user after being redirected from the bank to our server. Redirect her further.
-        if self.data['VK_SERVICE'] == '3012':
+        if self.data['VK_SERVICE'] == '3013':
             self.url = auth.redirect_after_success
         else:
             self.url = auth.redirect_on_failure

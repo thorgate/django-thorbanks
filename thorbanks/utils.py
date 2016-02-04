@@ -14,6 +14,32 @@ from Crypto.PublicKey import RSA
 from thorbanks import settings
 
 
+IPIZZA_REQUEST_ORDER = {
+    '3012': (
+        'VK_SERVICE', 'VK_VERSION', 'VK_USER',
+        'VK_DATETIME', 'VK_SND_ID', 'VK_REC_ID',
+        'VK_USER_NAME', 'VK_USER_ID', 'VK_COUNTRY',
+        'VK_OTHER', 'VK_TOKEN', 'VK_RID',
+    ),
+    '3013': (
+        'VK_SERVICE', 'VK_VERSION', 'VK_DATETIME',
+        'VK_SND_ID', 'VK_REC_ID', 'VK_NONCE',
+        'VK_USER_NAME', 'VK_USER_ID', 'VK_COUNTRY',
+        'VK_OTHER', 'VK_TOKEN', 'VK_RID',
+    ),
+    '4011': (
+        'VK_SERVICE', 'VK_VERSION', 'VK_SND_ID',
+        'VK_REPLY', 'VK_RETURN', 'VK_DATETIME',
+        'VK_RID',
+    ),
+    '4012': (
+        'VK_SERVICE', 'VK_VERSION', 'VK_SND_ID',
+        'VK_REC_ID', 'VK_NONCE', 'VK_RETURN',
+        'VK_DATETIME', 'VK_RID',
+    ),
+}
+
+
 def get_ordered_request(request, auth=False, response=False):
     def append_if_exists(target, source, the_value):
         if the_value in source:
@@ -45,19 +71,10 @@ def get_ordered_request(request, auth=False, response=False):
 
     else:
         if response:
-            expected_values = (
-                'VK_SERVICE', 'VK_VERSION', 'VK_USER',
-                'VK_DATETIME', 'VK_SND_ID', 'VK_REC_ID',
-                'VK_USER_NAME', 'VK_USER_ID', 'VK_COUNTRY',
-                'VK_OTHER', 'VK_TOKEN', 'VK_RID',
-            )
+            expected_values = IPIZZA_REQUEST_ORDER['3013']
 
         else:
-            expected_values = (
-                'VK_SERVICE', 'VK_VERSION', 'VK_SND_ID',
-                'VK_REPLY', 'VK_RETURN', 'VK_DATETIME',
-                'VK_RID',
-            )
+            expected_values = IPIZZA_REQUEST_ORDER['4012']
 
     ordered_request = []
     for value in expected_values:

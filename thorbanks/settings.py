@@ -40,8 +40,14 @@ def _configure():
                 if 'PUBLIC_KEY' not in data:
                     raise ImproperlyConfigured(u"PUBLIC_KEY not found in settings for bank %s" % bank_name)
 
-                if 'SND_ID' not in data:
-                    raise ImproperlyConfigured(u"SND_ID not found in settings for bank %s" % bank_name)
+                if 'SND_ID' in data:
+                    raise ImproperlyConfigured(u"SND_ID is removed. Use CLIENT_ID instead %s" % bank_name)
+
+                if 'CLIENT_ID' not in data:
+                    raise ImproperlyConfigured(u"CLIENT_ID not found in settings for bank %s" % bank_name)
+
+                if 'BANK_ID' not in data:
+                    raise ImproperlyConfigured(u"BANK_ID not found in settings for bank %s" % bank_name)
 
                 if not os.path.isfile(data['PRIVATE_KEY']):
                     raise ImproperlyConfigured(u"Private key file %s for bank %s does not exist." % (data['PRIVATE_KEY'], bank_name))
@@ -85,8 +91,12 @@ def get_public_key(the_bank):
     return LINKS[the_bank]['PUBLIC_KEY']
 
 
-def get_snd_id(the_bank):
-    return LINKS[the_bank]['SND_ID']
+def get_client_id(the_bank):
+    return LINKS[the_bank]['CLIENT_ID']
+
+
+def get_bank_id(the_bank):
+    return LINKS[the_bank]['BANK_ID']
 
 
 def get_request_url(the_bank):
