@@ -62,16 +62,18 @@ def _configure():
 
 
 def get_model(model_name):
-    return _get_model('thorbanks.%s' % model_name)
+    manual = getattr(settings, 'THORBANKS_MANUAL_MODELS', {})
+    model_full_name = manual.get(model_name, 'thorbanks.%s' % model_name)
+    return _get_model(model_full_name)
 
 
 def manual_models(model_name):
-    manual = getattr(settings, 'THORBANKS_MANUAL_MODELS', False)
+    manual = getattr(settings, 'THORBANKS_MANUAL_MODELS', {})
 
-    if manual and isinstance(manual, (list, tuple)):
-        return model_name in manual
+    if isinstance(manual, (list, tuple)):
+        raise ImproperlyConfigured("THORBANKS_MANUAL_MODELS setting should now be dict")
 
-    return False
+    return model_name in manual
 
 
 # Shorthand methods
