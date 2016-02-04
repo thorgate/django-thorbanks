@@ -70,22 +70,27 @@ class IPizzaAuthRequest(AuthRequestBase):
     VK_SERVICE = forms.CharField(widget=forms.HiddenInput())
     VK_VERSION = forms.CharField(widget=forms.HiddenInput())
     VK_SND_ID = forms.CharField(widget=forms.HiddenInput())
-    VK_REPLY = forms.CharField(widget=forms.HiddenInput())
+    VK_REC_ID = forms.CharField(widget=forms.HiddenInput())
+    VK_NONCE = forms.CharField(widget=forms.HiddenInput(), max_length=50)
     VK_RETURN = forms.CharField(widget=forms.HiddenInput())
     VK_DATETIME = forms.CharField(widget=forms.HiddenInput())
-    VK_RID = forms.CharField(widget=forms.HiddenInput())
+
     VK_ENCODING = forms.CharField(widget=forms.HiddenInput())
+
+    VK_RID = forms.CharField(widget=forms.HiddenInput(), required=False)
     VK_MAC = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def prepare(self, bank_name, redirect_to, response_url, *args, **kwargs):
         initial = {
-            'VK_RID': self.auth.pk,
-            'VK_SERVICE': '4011',
+            'VK_SERVICE': '4012',
             'VK_VERSION': '008',
-            'VK_REPLY': '3012',
-            'VK_SND_ID': settings.get_snd_id(bank_name),
+            'VK_SND_ID': settings.get_client_id(bank_name),
+            'VK_REC_ID': settings.get_bank_id(bank_name),
+            'VK_NONCE': self.auth.pk,
             'VK_RETURN': response_url,
             'VK_DATETIME': self.auth.created.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'VK_RID': '',
+            'VK_REPLY': '3013',
             'VK_ENCODING': self.get_encoding(),
         }
         return initial
@@ -113,7 +118,7 @@ class NordeaAuthRequest(AuthRequestBase):
         initial = {
             'A01Y_ACTION_ID': '701',
             'A01Y_VERS': '0002',
-            'A01Y_RCVID': settings.get_snd_id(bank_name),
+            'A01Y_RCVID': settings.get_client_id(bank_name),
             'A01Y_LANGCODE': 'ET',
             'A01Y_STAMP': self.auth.pk,
             'A01Y_IDTYPE': '02',
@@ -254,7 +259,7 @@ class PaymentRequest(PaymentRequestBase):
             'VK_RETURN': url,
             'VK_CANCEL': url,
             'VK_LANG': language,
-            'VK_SND_ID': settings.get_snd_id(transaction.bank_name),
+            'VK_SND_ID': settings.get_client_id(transaction.bank_name),
 
             'VK_STAMP': transaction.pk,
             'VK_REF': calculate_731_checksum(transaction.pk),

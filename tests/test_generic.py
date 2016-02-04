@@ -32,7 +32,8 @@ def get_banklink_config(bank_name=None, printable_name=None):
         bank_name or 'swedbank': {
             'PRINTABLE_NAME': printable_name or 'Swedbank',
             'REQUEST_URL': 'http://banks.maximum.thorgate.eu/banklink/swedbank-common',
-            'SND_ID': 'uid100052',
+            'CLIENT_ID': 'uid100052',
+            'BANK_ID': 'HP',
             'PRIVATE_KEY': os.path.join(base_dir, 'certs', 'swed_key.pem'),
             'PUBLIC_KEY': os.path.join(base_dir, 'certs', 'swed_pub.pem'),
             'TYPE': 'banklink',
@@ -42,7 +43,8 @@ def get_banklink_config(bank_name=None, printable_name=None):
         'seb': {
             'PRINTABLE_NAME': 'SEB',
             'REQUEST_URL': 'http://banks.maximum.thorgate.eu/banklink/seb-common',
-            'SND_ID': 'uid100036',
+            'CLIENT_ID': 'uid100036',
+            'BANK_ID': 'EYP',
             'PRIVATE_KEY': os.path.join(base_dir, 'certs', 'seb_key.pem'),
             'PUBLIC_KEY': os.path.join(base_dir, 'certs', 'seb_pub.pem'),
             'DIGEST_COUNTS_BYTES': True,
@@ -53,7 +55,8 @@ def get_banklink_config(bank_name=None, printable_name=None):
         'lhv': {
             'PRINTABLE_NAME': 'LHV',
             'REQUEST_URL': 'http://banks.maximum.thorgate.eu/banklink/lhv-common',
-            'SND_ID': 'uid100049',
+            'CLIENT_ID': 'uid100049',
+            'BANK_ID': 'LHV',
             'PRIVATE_KEY': os.path.join(base_dir, 'certs', 'lhv_key.pem'),
             'PUBLIC_KEY': os.path.join(base_dir, 'certs', 'lhv_pub.pem'),
             'TYPE': 'banklink',
@@ -63,7 +66,8 @@ def get_banklink_config(bank_name=None, printable_name=None):
         'danske': {
             'PRINTABLE_NAME': 'Danske',
             'REQUEST_URL': 'http://banks.maximum.thorgate.eu/banklink/sampo-common',
-            'SND_ID': 'uid100010',
+            'CLIENT_ID': 'uid100010',
+            'BANK_ID': 'SAMPOPANK',
             'PRIVATE_KEY': os.path.join(base_dir, 'certs', 'danske_key.pem'),
             'PUBLIC_KEY': os.path.join(base_dir, 'certs', 'danske_pub.pem'),
             'TYPE': 'banklink',
@@ -109,7 +113,17 @@ def test_banklink_data_not_dict(settings):
     assert_ex_msg(e, "Each bank in settings.BANKLINKS must correspond to dict with settings of that bank")
 
 
-@pytest.mark.parametrize("missing_key", ['PRIVATE_KEY', 'PUBLIC_KEY', 'SND_ID', 'REQUEST_URL'])
+def test_deprecated_keys(settings):
+    settings.BANKLINKS = get_banklink_config()
+    settings.BANKLINKS['swedbank']['SND_ID'] = '123'
+
+    with pytest.raises(ImproperlyConfigured) as e:
+        th_settings.configure()
+
+    assert_ex_msg(e, "SND_ID is removed. Use CLIENT_ID instead swedbank")
+
+
+@pytest.mark.parametrize("missing_key", ['PRIVATE_KEY', 'PUBLIC_KEY', 'CLIENT_ID', 'REQUEST_URL', 'BANK_ID'])
 def test_missing_keys(settings, missing_key):
     settings.BANKLINKS = get_banklink_config()
     del settings.BANKLINKS['swedbank'][missing_key]
@@ -140,7 +154,7 @@ def test_getters(settings):
 
     assert th_settings.get_private_key("swedbank") == conf["swedbank"]["PRIVATE_KEY"]
     assert th_settings.get_public_key("swedbank") == conf["swedbank"]["PUBLIC_KEY"]
-    assert th_settings.get_snd_id("swedbank") == conf["swedbank"]["SND_ID"]
+    assert th_settings.get_client_id("swedbank") == conf["swedbank"]["CLIENT_ID"]
     assert th_settings.get_request_url("swedbank") == conf["swedbank"]["REQUEST_URL"]
     assert th_settings.get_link_type("swedbank") == conf["swedbank"]["TYPE"]
 

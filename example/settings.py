@@ -104,7 +104,8 @@ BANKLINKS = {
     'swedbank': {
         'PRINTABLE_NAME': 'Swedbank',
         'REQUEST_URL': 'http://banks.maximum.thorgate.eu/banklink/swedbank-common',
-        'SND_ID': 'uid100052',
+        'CLIENT_ID': 'uid100052',
+        'BANK_ID': 'HP',
         'PRIVATE_KEY': os.path.join(BASE_DIR, '..', 'certs', 'swed_key.pem'),
         'PUBLIC_KEY': os.path.join(BASE_DIR, '..', 'certs', 'swed_pub.pem'),
         'TYPE': 'banklink',
@@ -114,7 +115,8 @@ BANKLINKS = {
     'seb': {
         'PRINTABLE_NAME': 'SEB',
         'REQUEST_URL': 'http://banks.maximum.thorgate.eu/banklink/seb-common',
-        'SND_ID': 'uid100036',
+        'CLIENT_ID': 'uid100036',
+        'BANK_ID': 'EYP',
         'PRIVATE_KEY': os.path.join(BASE_DIR, '..', 'certs', 'seb_key.pem'),
         'PUBLIC_KEY': os.path.join(BASE_DIR, '..', 'certs', 'seb_pub.pem'),
         'DIGEST_COUNTS_BYTES': True,
@@ -125,7 +127,8 @@ BANKLINKS = {
     'danske': {
         'PRINTABLE_NAME': 'Danske Bank',
         'REQUEST_URL': 'http://banks.maximum.thorgate.eu/banklink/sampo-common',
-        'SND_ID': 'uid100010',
+        'CLIENT_ID': 'uid100010',
+        'BANK_ID': 'SAMPOPANK',
         'PRIVATE_KEY': os.path.join(BASE_DIR, '..', 'certs', 'danske_key.pem'),
         'PUBLIC_KEY': os.path.join(BASE_DIR, '..', 'certs', 'danske_pub.pem'),
         'ENCODING': 'ISO-8859-1',
@@ -136,7 +139,7 @@ BANKLINKS = {
     'nordea': {
         'PRINTABLE_NAME': 'Nordea',
         'REQUEST_URL': 'https://netbank.nordea.com/pnbeidtest/eid.jsp',
-        'SND_ID': '87654321',
+        'CLIENT_ID': '87654321',
         'MAC_KEY': 'LEHTI',
         'TYPE': 'banklink',
         'PROTOCOL': 'nordea',
@@ -145,7 +148,8 @@ BANKLINKS = {
     'lhv': {
         'PRINTABLE_NAME': 'LHV',
         'REQUEST_URL': 'http://banks.maximum.thorgate.eu/banklink/lhv-common',
-        'SND_ID': 'uid100049',
+        'CLIENT_ID': 'uid100049',
+        'BANK_ID': 'LHV',
         'PRIVATE_KEY': os.path.join(BASE_DIR, '..', 'certs', 'lhv_key.pem'),
         'PUBLIC_KEY': os.path.join(BASE_DIR, '..', 'certs', 'lhv_pub.pem'),
         'TYPE': 'banklink',
