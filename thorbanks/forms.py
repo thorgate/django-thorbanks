@@ -126,7 +126,7 @@ class NordeaAuthRequest(AuthRequestBase):
             'A01Y_CANLINK': response_url,
             'A01Y_REJLINK': response_url,
             'A01Y_KEYVERS': '0001',     # TODO: support multiple keys
-            'A01Y_ALG': '02',           # We use SHA1 to calculate MAC
+            'A01Y_ALG': '01',           # We use MD5 to calculate MAC since nordea LIVE does not like SHA1
         }
         return initial
 

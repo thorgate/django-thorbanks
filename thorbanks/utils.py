@@ -134,7 +134,7 @@ def nordea_generate_mac(data, fields, mac_key):
     mac_tokens = [token.encode('iso-8859-1') for token in mac_tokens]
     mac_data = b'&'.join(mac_tokens) + b'&'
 
-    h = hashlib.sha1(mac_data)
+    h = hashlib.md5(mac_data)
     return h.hexdigest().upper()
 
 
