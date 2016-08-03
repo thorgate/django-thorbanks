@@ -166,7 +166,7 @@ class PaymentRequestBase(forms.Form):
 
         transaction_started.send(settings.get_model('Transaction'), transaction=self.transaction)
 
-        initial = self.prepare(self.transaction, kwargs['url'])
+        initial = self.prepare(self.transaction, kwargs['url'], send_ref=kwargs.pop('send_ref', True))
 
         super(PaymentRequestBase, self).__init__(initial, *args)
 
@@ -178,7 +178,7 @@ class PaymentRequestBase(forms.Form):
             raise RuntimeError("signature is invalid")
 
     @classmethod
-    def prepare(cls, transaction, url, language='EST'):
+    def prepare(cls, transaction, url, language='EST', send_ref=True):
         raise NotImplementedError
 
     def finalize(self):
@@ -237,7 +237,7 @@ class PaymentRequest(PaymentRequestBase):
     VK_STAMP = forms.CharField(widget=forms.HiddenInput())
     VK_AMOUNT = forms.CharField(widget=forms.HiddenInput())
     VK_CURR = forms.CharField(widget=forms.HiddenInput())
-    VK_REF = forms.CharField(widget=forms.HiddenInput())
+    VK_REF = forms.CharField(widget=forms.HiddenInput(), required=False)
     VK_MSG = forms.CharField(widget=forms.HiddenInput())
     VK_RETURN = forms.CharField(widget=forms.HiddenInput())
     VK_CANCEL = forms.CharField(widget=forms.HiddenInput())
@@ -247,7 +247,7 @@ class PaymentRequest(PaymentRequestBase):
     VK_ENCODING = forms.CharField(widget=forms.HiddenInput())
 
     @classmethod
-    def prepare(cls, transaction, url, language='EST'):
+    def prepare(cls, transaction, url, language='EST', send_ref=True):
         assert language in ['EST', 'ENG', 'RUS']
 
         return {
@@ -262,7 +262,7 @@ class PaymentRequest(PaymentRequestBase):
             'VK_SND_ID': settings.get_client_id(transaction.bank_name),
 
             'VK_STAMP': transaction.pk,
-            'VK_REF': calculate_731_checksum(transaction.pk),
+            'VK_REF': calculate_731_checksum(transaction.pk) if send_ref else '',
 
             'VK_AMOUNT': transaction.amount,
             'VK_CURR': transaction.currency,
