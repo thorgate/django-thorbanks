@@ -111,6 +111,10 @@ def get_link_protocol(the_bank):
     return LINKS[the_bank].get('PROTOCOL', 'ipizza')
 
 
+def get_send_ref(the_bank):
+    return LINKS[the_bank].get('SEND_REF', True)
+
+
 def get_bank_choices():
     """ Returns list of (bank_name, pretty_name, image_path, order) tuples.
     Useful in forms

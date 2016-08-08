@@ -13,6 +13,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from thorbanks import settings
+from thorbanks.settings import get_send_ref
 from thorbanks.utils import create_signature, nordea_generate_mac
 from thorbanks.signals import transaction_started
 from thorbanks.utils import calculate_731_checksum
@@ -237,7 +238,7 @@ class PaymentRequest(PaymentRequestBase):
     VK_STAMP = forms.CharField(widget=forms.HiddenInput())
     VK_AMOUNT = forms.CharField(widget=forms.HiddenInput())
     VK_CURR = forms.CharField(widget=forms.HiddenInput())
-    VK_REF = forms.CharField(widget=forms.HiddenInput())
+    VK_REF = forms.CharField(widget=forms.HiddenInput(), required=False)
     VK_MSG = forms.CharField(widget=forms.HiddenInput())
     VK_RETURN = forms.CharField(widget=forms.HiddenInput())
     VK_CANCEL = forms.CharField(widget=forms.HiddenInput())
@@ -262,7 +263,7 @@ class PaymentRequest(PaymentRequestBase):
             'VK_SND_ID': settings.get_client_id(transaction.bank_name),
 
             'VK_STAMP': transaction.pk,
-            'VK_REF': calculate_731_checksum(transaction.pk),
+            'VK_REF': calculate_731_checksum(transaction.pk) if get_send_ref(transaction.bank_name) else '',
 
             'VK_AMOUNT': transaction.amount,
             'VK_CURR': transaction.currency,

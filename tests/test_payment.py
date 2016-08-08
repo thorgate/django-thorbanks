@@ -15,16 +15,19 @@ from tests.utils import select_radio, click, IPIZZA_BANKS, ready, set_input_text
 
 
 @pytest.mark.parametrize("bank_name", IPIZZA_BANKS)
+@pytest.mark.parametrize("send_ref", [True, False])
 @pytest.mark.django_db
 @pytest.mark.timeout(TIMEOUT)
-def test_payment_flow(bank_name, live_server, selenium):
+def test_payment_flow(bank_name, send_ref, live_server, selenium):
     from shop.models import Order
     from thorbanks.models import Transaction
+
+    assert bank_name in IPIZZA_BANKS
 
     if IS_TRAVIS:
         time.sleep(1 + random.uniform(0.5, 2.3))  # Give server time to start up
 
-    pay_url = '%s%s' % (live_server.url, reverse('payment'))
+    pay_url = '%s%s?send_ref=%d' % (live_server.url, reverse('payment'), 1 if send_ref else 0)
 
     # Get the order page
     selenium.get(pay_url)
