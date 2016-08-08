@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormView
+from thorbanks.settings import LINKS
 
 from thorbanks.views import create_payment_request, create_auth_request, AuthResponseView, AuthError
 from thorbanks.utils import pingback_url
@@ -35,12 +36,20 @@ class PaymentView(CreateView):
         redirect_url = reverse('order-success', kwargs={'pk': self.object.id})
         redirect_on_failure_url = reverse('order-failed', kwargs={'pk': self.object.id})
 
+        # Allow overwriting of send_ref value via url param (this is for unittests)
+        # WARNING: Don't use this in production code
+        old_val = LINKS[form.cleaned_data['bank_name']].get('SEND_REF', True)
+        LINKS[form.cleaned_data['bank_name']]['SEND_REF'] = self.request.GET.get('send_ref', '1') == '1'
+
         # Create new payment request
         payment = create_payment_request(bank_name=form.cleaned_data['bank_name'], message="My cool payment",
                                          amount=form.cleaned_data['amount'], currency='EUR',
                                          pingback_url=pingback_url(self.request),
                                          redirect_on_failure=redirect_on_failure_url,
                                          redirect_to=redirect_url)
+
+        # restore old SEND_REF value
+        LINKS[form.cleaned_data['bank_name']]['SEND_REF'] = old_val
 
         # Attach the pending transaction object to the Order object
         self.object.transaction = payment.transaction

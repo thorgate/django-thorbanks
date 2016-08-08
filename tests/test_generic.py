@@ -39,6 +39,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
             'TYPE': 'banklink',
             'IMAGE_PATH': 'swedbank.png',
             'ORDER': 1,
+            'SEND_REF': True,
         },
         'seb': {
             'PRINTABLE_NAME': 'SEB',
@@ -51,6 +52,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
             'TYPE': 'banklink',
             'IMAGE_PATH': 'seb.png',
             'ORDER': 2,
+            'SEND_REF': False,
         },
         'lhv': {
             'PRINTABLE_NAME': 'LHV',
@@ -157,6 +159,10 @@ def test_getters(settings):
     assert th_settings.get_client_id("swedbank") == conf["swedbank"]["CLIENT_ID"]
     assert th_settings.get_request_url("swedbank") == conf["swedbank"]["REQUEST_URL"]
     assert th_settings.get_link_type("swedbank") == conf["swedbank"]["TYPE"]
+
+    assert th_settings.get_send_ref("swedbank") == conf["swedbank"]["SEND_REF"]
+    assert th_settings.get_send_ref("seb") == conf["seb"]["SEND_REF"]
+    assert th_settings.get_send_ref("danske") is True
 
     the_list = th_settings.get_bank_choices()
     assert isinstance(the_list, list)
