@@ -1,9 +1,9 @@
 django-thorbanks
 ================
 
-[![Build Status](https://travis-ci.org/thorgate/django-thorbanks.svg)](https://travis-ci.org/thorgate/django-thorbanks)
-[![Coverage Status](https://coveralls.io/repos/thorgate/django-thorbanks/badge.svg?service=github)](https://coveralls.io/github/thorgate/django-thorbanks)
-[![Coverage Status](https://badge.fury.io/py/django-thorbanks.png)](https://badge.fury.io/py/django-thorbanks)
+[![Build Status](https://travis-ci.org/thorgate/django-thorbanks.svg?branch=master)](https://travis-ci.org/thorgate/django-thorbanks)
+[![Coverage Status](https://coveralls.io/repos/github/thorgate/django-thorbanks/badge.svg?branch=master)](https://coveralls.io/github/thorgate/django-thorbanks?branch=master)
+[![PyPI release](https://badge.fury.io/py/django-thorbanks.png)](https://badge.fury.io/py/django-thorbanks)
 
 
 Django app for integrating Estonian banklinks into your project.
