@@ -20,4 +20,5 @@ SEB             | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
 Danske          | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
 LHV             | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
 Krediidipank    | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
+Nordea          | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
 Nordea          | SOLO        | :heavy_check_mark:  | :x:
