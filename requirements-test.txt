@@ -12,3 +12,4 @@ flake8-future-import
 mock>=1.0.1
 tox>=1.7.0
 pytest-selenium
+selenium==2.52.0
