@@ -29,3 +29,19 @@ env:
   - TOXENV=flake8
   - TOXENV=coverage
 after_success: coveralls
+deploy:
+  provider: pypi
+  user: thorgate
+  password:
+    secure: >
+      bSTlfij4rUNYz3h0XZ0LcN4Rjclco/E3j32TnOCp8R/+x0PyQr1Mcbqcn48foFNd9EDSjhaPWG0O1GpfeV1RdwBfjnFqZk/9vcl898Y/5RTD7
+      qntHVSdyBQf4j8PxyrfFpcJyZLmvbOrkexIVGRNph9kL4+LUnsfy9vsR6j3nA1fKmpNUIxPJ8EUxK+FxSB43rCaYDdF2t5LlmhD27Drra0/Le
+      7N/DF5WeONa09iC8U9qrru7ksv+ARXKWpe6lDWhN0N+lEq+TsNmdD4C7KopcRuwy3Xlc+vpQfK7TqHxgCaPWMHg79huj0xxVWimMjuDnXoM/P
+      3bB7qpwO/i8moVGv+FIpk4Qc2Zh8fyUTbxK0kHLFfxntOLAqxuKmuKiXFC4p3kJYgG9f3XnNOX89WkygLAgboKgMUM/txU3CE9Zsmm4+TCg6b
+      KfsUNmp0bFFPEfqV2lPq5YdCjyJjF8wOx5N8/HOgCpfWQ442jbhqhmVuJwS4rZK3sYu5oOQVjJ1JGjV3LOltsFg9/t+iTiHT1/oQLGBuAXVfp
+      DInaj86ii/myxNJBIaycFSr4l41qmH/Bhca1UcJxQmeM7FWawoLF4/WCXEElJHeLl3hQxqdCCNsHWGbTczg4kmU4fFqPVZA4DT049uXFVCvfF
+      haqETlzR7xs/XIQh4NJ79Hg3KVpZU=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: thorgate/django-thorbanks
