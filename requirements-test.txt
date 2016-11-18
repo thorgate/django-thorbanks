@@ -1,14 +1,15 @@
 # Development needs the following packages
 
-pytest
-coverage
-coveralls
-pytest-cov
-pytest-django
-pytest-xdist
-pytest-timeout
+pytest==3.0.4
+coverage==4.2
+coveralls==1.1
+pytest-cov==2.4.0
+pytest-django==2.9.1
+pytest-xdist==1.15.0
+pytest-timeout==1.2.0
 flake8
 flake8-future-import
 mock>=1.0.1
 tox>=1.7.0
-pytest-selenium
+pytest-selenium==1.6.0
+selenium==2.52.0
