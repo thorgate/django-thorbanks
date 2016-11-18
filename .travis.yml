@@ -1,7 +1,5 @@
 language: python
 python:
-  - "2.7"
-  - "3.4"
   - "3.5"
 before_install:
   - "export DISPLAY=:99.0"
@@ -26,7 +24,6 @@ env:
   - TOXENV=py34-django17
   - TOXENV=py34-django18
   - TOXENV=py34-django19
-  - TOXENV=py35-django17
   - TOXENV=py35-django18
   - TOXENV=py35-django19
   - TOXENV=flake8
