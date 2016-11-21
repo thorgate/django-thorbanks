@@ -20,4 +20,7 @@ SEB             | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
 Danske          | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
 LHV             | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
 Krediidipank    | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
-Nordea          | SOLO        | :heavy_check_mark:  | :x:
+Nordea          | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
+Nordea          | SOLO<sup>1</sup>    | :heavy_check_mark:  | :x:
+
+<sup>1</sup>: Nordea SOLO protocol api is considered deprecated and will be removed in the near future (since Nordea also supports iPizza protocol)
