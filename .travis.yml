@@ -42,6 +42,9 @@ deploy:
       DInaj86ii/myxNJBIaycFSr4l41qmH/Bhca1UcJxQmeM7FWawoLF4/WCXEElJHeLl3hQxqdCCNsHWGbTczg4kmU4fFqPVZA4DT049uXFVCvfF
       haqETlzR7xs/XIQh4NJ79Hg3KVpZU=
   on:
+    # Warning: With this config, the package is released on pypi after the first matrix job succeeeds. This is currently fine
+    #           since we shouldn't create tags before a successful build. Travis plans to add after_success callback in Q1/Q2 of
+    #           2017. See https://github.com/travis-ci/travis-ci/issues/929 for more info.
     tags: true
     distributions: sdist bdist_wheel
     repo: thorgate/django-thorbanks
