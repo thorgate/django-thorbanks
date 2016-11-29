@@ -5,8 +5,8 @@ before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
 install:
-- pip install tox
-- pip install coveralls
+  - pip install tox
+  - pip install coveralls
 script:
 - tox
 env:
