@@ -1,14 +1,19 @@
 language: python
+
 python:
   - "3.5"
+
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+
 install:
   - pip install tox
   - pip install coveralls
+
 script:
 - tox
+
 env:
   matrix:
   - TOXENV=py27-django14
@@ -28,7 +33,9 @@ env:
   - TOXENV=py35-django19
   - TOXENV=flake8
   - TOXENV=coverage
+
 after_success: coveralls
+
 deploy:
   provider: pypi
   user: thorgate
@@ -48,3 +55,6 @@ deploy:
     tags: true
     distributions: sdist bdist_wheel
     repo: thorgate/django-thorbanks
+
+notifications:
+  email: false
