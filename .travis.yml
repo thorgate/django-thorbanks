@@ -6,6 +6,8 @@ python:
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.19.0/geckodriver-v0.19.0-linux64.tar.gz | tar zxvf -
+  - mv geckodriver /usr/local/bin/
 
 install:
   - pip install tox
