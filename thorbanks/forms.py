@@ -66,6 +66,12 @@ class AuthRequestBase(forms.Form):
     def get_encoding(self):
         return 'UTF-8'
 
+    def get_redirect_response_html(self):
+        return render_to_string("thorbanks/auth-request.html", {'form': self})
+
+    def get_redirect_response(self):
+        return HttpResponse(self.get_redirect_response_html(), content_type='text/html')
+
 
 class IPizzaAuthRequest(AuthRequestBase):
     VK_SERVICE = forms.CharField(widget=forms.HiddenInput())
@@ -221,10 +227,10 @@ class PaymentRequestBase(forms.Form):
         return 'UTF-8'
 
     def get_redirect_response_html(self):
-        return render_to_string("thorbanks/request.html", {'form': self})
+        return render_to_string("thorbanks/payment-request.html", {'form': self})
 
     def get_redirect_response(self):
-        return HttpResponse(self.get_redirect_response_html())
+        return HttpResponse(self.get_redirect_response_html(), content_type='text/html')
 
 
 class PaymentRequest(PaymentRequestBase):
