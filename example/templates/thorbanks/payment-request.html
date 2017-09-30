@@ -2,11 +2,11 @@
 
 <html>
     <head>
-        <title>Thorbanks example</title>
+        <title>Banklink request</title>
+        <meta http-equiv="Content-Type" value="text/html; charset=utf-8" />
         <link rel="shortcut icon" href="{% static "favicon.ico" %}">
     </head>
-
     <body>
-        {% block content %}{% endblock %}
+        {{ form.redirect_html|safe }}
     </body>
 </html>

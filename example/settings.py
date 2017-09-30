@@ -98,6 +98,9 @@ if django.VERSION[0] == 1 and django.VERSION[1] <= 4:
         os.path.join(BASE_DIR, 'legacy_templates'),
     ] + TEMPLATE_DIRS
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Bank links
 BANKLINKS = {
