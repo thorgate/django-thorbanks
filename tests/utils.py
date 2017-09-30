@@ -12,7 +12,7 @@ IPIZZA_BANKS = [
 ]
 
 IS_TRAVIS = os.environ.get('TRAVIS', None)
-TIMEOUT = 200 if IS_TRAVIS else 20
+TIMEOUT = 400 if IS_TRAVIS else 20
 
 
 def click(selector, selenium):
