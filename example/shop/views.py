@@ -4,7 +4,6 @@ import sys
 
 from django import http
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.debug import ExceptionReporter
 from django.views.decorators.csrf import csrf_exempt
