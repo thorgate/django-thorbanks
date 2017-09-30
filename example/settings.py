@@ -143,6 +143,7 @@ BANKLINKS = {
         'MAC_KEY': 'LEHTI',
         'TYPE': 'banklink',
         'PROTOCOL': 'nordea',
+        'IMAGE_PATH': 'nordea.png',
         'ORDER': 4,
     },
     'lhv': {

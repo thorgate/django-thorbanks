@@ -6,13 +6,16 @@ python:
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+  - mkdir geckodriver
+  - wget -O - https://github.com/mozilla/geckodriver/releases/download/v0.19.0/geckodriver-v0.19.0-linux64.tar.gz | tar zxvf - -C geckodriver
+  - export PATH=$PATH:$PWD/geckodriver
 
 install:
   - pip install tox
   - pip install coveralls
 
 script:
-- tox
+  - tox
 
 env:
   matrix:
@@ -31,30 +34,30 @@ env:
   - TOXENV=py34-django19
   - TOXENV=py35-django18
   - TOXENV=py35-django19
-  - TOXENV=flake8
-  - TOXENV=coverage
 
-after_success: coveralls
+after_success:
+  - test $TOXENV = "py35-django19" && coveralls
 
-deploy:
-  provider: pypi
-  user: thorgate
-  password:
-    secure: >
-      U0LScBu0WYlcUTdUfNbfPNdl93AyksAWmSdxHgF925ErE2PWRy7CkGjVon+/sOT0OOmQiaLB0xnjpwF5O7hR8uhjWYcFx3YbdjRhdmM0x+Ulc
-      7pTUu7XP5skHWtfFxW1dzc3TP9P/5n4u+jj/YanduF1FC96VG/cd9OZlJJfe4zKRdJQ8o3NUvlJjJcVVAg39wSTKq6/dkxjIkHn0578CD3Kei
-      1zr5EntKfNxn4ER5lR20oHhIxPQVu2CHtrm0MvqZfAdFEpYq920fHGCFaaUpWdZ1gOpXS0O8C6uNRtPV38HBiqfEsqSY5JuRmLRh303Y+PhRn
-      WAY9GUGRnyZP8bfFOm9nE7+atKmP4sQaJals/3GHyyK4zNkYo1Lz4o7I6qpM9wMpo0y0L/OjhAyRvwvlwmSIT8MRu6Ihf+xV2br8ewBjiezDx
-      HP+gD5EC8kwMjT/fGYxwwN27SBc8jvEitb8H0yfsVHmYMmxTbGHADZLyvzLour59EaKvba0xWzXMeyxXog7kn40anZTsDQfPq0sX7QWuQruu0
-      Xk1BrTIpVXGYGqUw5sjyc7YiwkvpdCh5C+sooXVSUKfmsfZsZqJHT2lb5QHKeWyd/KrwH6nIRE6pmuK8ye/FJPc3lLiEBJlujDFmwRIWRQhTr
-      WgjxgoevQuSxwop0ANTAtPrKdoIcY=
-  on:
-    # Warning: With this config, the package is released on pypi after the first matrix job succeeeds. This is currently fine
-    #           since we shouldn't create tags before a successful build. Travis plans to add after_success callback in Q1/Q2 of
-    #           2017. See https://github.com/travis-ci/travis-ci/issues/929 for more info.
-    tags: true
-    distributions: sdist bdist_wheel
-    repo: thorgate/django-thorbanks
+jobs:
+  include:
+    - stage: deploy
+      env: TOXENV=py35-django19
+      deploy:
+        provider: pypi
+        user: thorgate
+        password:
+          secure: >
+            U0LScBu0WYlcUTdUfNbfPNdl93AyksAWmSdxHgF925ErE2PWRy7CkGjVon+/sOT0OOmQiaLB0xnjpwF5O7hR8uhjWYcFx3YbdjRhdmM0x+Ulc
+            7pTUu7XP5skHWtfFxW1dzc3TP9P/5n4u+jj/YanduF1FC96VG/cd9OZlJJfe4zKRdJQ8o3NUvlJjJcVVAg39wSTKq6/dkxjIkHn0578CD3Kei
+            1zr5EntKfNxn4ER5lR20oHhIxPQVu2CHtrm0MvqZfAdFEpYq920fHGCFaaUpWdZ1gOpXS0O8C6uNRtPV38HBiqfEsqSY5JuRmLRh303Y+PhRn
+            WAY9GUGRnyZP8bfFOm9nE7+atKmP4sQaJals/3GHyyK4zNkYo1Lz4o7I6qpM9wMpo0y0L/OjhAyRvwvlwmSIT8MRu6Ihf+xV2br8ewBjiezDx
+            HP+gD5EC8kwMjT/fGYxwwN27SBc8jvEitb8H0yfsVHmYMmxTbGHADZLyvzLour59EaKvba0xWzXMeyxXog7kn40anZTsDQfPq0sX7QWuQruu0
+            Xk1BrTIpVXGYGqUw5sjyc7YiwkvpdCh5C+sooXVSUKfmsfZsZqJHT2lb5QHKeWyd/KrwH6nIRE6pmuK8ye/FJPc3lLiEBJlujDFmwRIWRQhTr
+            WgjxgoevQuSxwop0ANTAtPrKdoIcY=
+        on:
+          tags: true
+          distributions: sdist bdist_wheel
+          repo: thorgate/django-thorbanks
 
 notifications:
   email: false
