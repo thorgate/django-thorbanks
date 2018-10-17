@@ -4,7 +4,6 @@ import sys
 
 from django import http
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.debug import ExceptionReporter
 from django.views.decorators.csrf import csrf_exempt
@@ -86,7 +85,7 @@ class AuthenticationView(FormView):
         )
 
         # Finally, return the HTTP response which redirects the user to the bank
-        return HttpResponse(auth_form.redirect_html())
+        return auth_form.get_redirect_response()
 
 
 class AuthenticationCompleteView(AuthResponseView, TemplateView):

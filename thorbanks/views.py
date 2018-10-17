@@ -74,8 +74,8 @@ def response(request):
         raise PaymentError("Bank sent confirmation with invalid VK_SERVICE!")
 
     if data['VK_AUTO'] == 'Y':
-        # This is automatic pingback from the bank - send simple 200 response.
-        return HttpResponse("request handled")
+        # This is automatic pingback from the bank - send simple 200 response as text/plain.
+        return HttpResponse("request handled", content_type='text/plain')
 
     else:
         # This request is from the user after being redirected from the bank to our server. Redirect her further.
