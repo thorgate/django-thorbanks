@@ -2,20 +2,15 @@
 from __future__ import unicode_literals
 
 import random
-from base64 import b64encode
+from base64 import b64encode, b64decode
 from Crypto.Hash import SHA
 
 import pytest
 
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
-from django.utils import six
+from django.urls import reverse
 
-try:
-    from django.utils.encoding import force_bytes
-
-except ImportError:
-    from django.utils.encoding import smart_str as force_bytes
+from django.utils.encoding import force_bytes, force_str
 
 from tests.utils import assert_ex_msg
 from thorbanks import settings as th_settings
@@ -225,7 +220,9 @@ def test_payment_result(settings):
     )
 
     assert request_digest(request.cleaned_data, request.transaction.bank_name) == expected_digest
-    assert request['VK_MAC'].value() == b64encode(get_pkey('swedbank').sign(SHA.new(expected_digest)))
+    assert request['VK_MAC'].value() == force_str(b64encode(get_pkey('swedbank').sign(SHA.new(expected_digest))))
+
+    assert len(b64decode(request['VK_MAC'].value())) == 256  # The key must be 256 bytes (2048 bit)
 
 
 @pytest.mark.django_db
@@ -240,6 +237,5 @@ def test_payment_form_html_decode_error():
         url="http://example.com",
     )
 
-    assert isinstance(form.submit_button(), six.text_type)
-    assert isinstance(form.redirect_html(), six.text_type)
-    assert isinstance(form.as_html(), six.text_type)  # TODO: Remove once we drop the method
+    assert isinstance(form.submit_button(), str)
+    assert isinstance(form.redirect_html(), str)

@@ -11,7 +11,7 @@ from thorbanks.signals import transaction_succeeded, transaction_failed
 class Order(models.Model):
     amount = models.FloatField()
 
-    transaction = models.OneToOneField('thorbanks.Transaction', null=True)
+    transaction = models.OneToOneField('thorbanks.Transaction', null=True, on_delete=models.SET_NULL)
     is_paid = models.BooleanField(default=False)
 
     def complete(self):

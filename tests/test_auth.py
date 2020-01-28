@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from tests.utils import select_radio, click, IPIZZA_BANKS, ready, set_input_text, assert_no_errors, IS_TRAVIS, TIMEOUT
 

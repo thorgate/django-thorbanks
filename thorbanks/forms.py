@@ -1,14 +1,13 @@
 from __future__ import unicode_literals
 
-from warnings import warn
-
 from django import forms
 from django.conf import settings as django_settings
-from django.forms.widgets import RadioFieldRenderer
+
+from django.forms.widgets import RadioSelect
+
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.utils.encoding import force_text
-from django.utils.html import conditional_escape
+from django.utils.encoding import force_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
@@ -50,7 +49,7 @@ class AuthRequestBase(forms.Form):
             self.get_request_url(), self.get_encoding())
 
         for field in self:
-            html += force_text(field) + "\n"
+            html += force_str(field) + "\n"
 
         html += '</form>'
         html += """<script type="text/javascript">
@@ -195,7 +194,7 @@ class PaymentRequestBase(forms.Form):
         html = '<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">' % (
             self.get_request_url(), self.get_encoding())
         for field in self:
-            html += force_text(field) + u"\n"
+            html += force_str(field) + u"\n"
         html += '</form>'
         html += '''<script type="text/javascript">
                     document.forms['banklink_redirect_url'].submit();
@@ -205,20 +204,10 @@ class PaymentRequestBase(forms.Form):
     def submit_button(self, value=u"Make the payment"):
         html = '<form action="%s" method="POST">' % (settings.get_request_url(self.transaction.bank_name))
         for field in self:
-            html += force_text(field) + u"\n"
+            html += force_str(field) + u"\n"
         html += '<input type="submit" value="%s" />' % value
         html += '</form>'
         return mark_safe(html)
-
-    def as_html(self, with_submit=False, id="banklink_payment_form", submit_value="submit"):
-        warn("deprecated", DeprecationWarning)
-        html = '<form action="%s" method="POST" id="%s">' % (settings.get_request_url(self.transaction.bank_name), id)
-        for field in self:
-            html += force_text(field) + u"\n"
-        if with_submit:
-            html += '<input type="submit" value="%s"/>' % (submit_value, )
-        html += '</form>'
-        return html
 
     def get_request_url(self):
         return settings.get_request_url(self.transaction.bank_name)
@@ -292,24 +281,11 @@ class PaymentFormMixin(object):
         # Add your custom fields and/or inherit from ModelForm instead of Form
     ```
     """
-    class BankNameFieldRenderer(RadioFieldRenderer):
-        """ Augmented RadioFieldRenderer that lets us use out own CSS class.
+    class BankNameFieldWidget(RadioSelect):
+        """ Augmented RadioSelect that lets us use our own CSS class.
         """
-        UL_HTML = '<ul class="payment-options clearfix">%s</ul>'
-        LI_HTML = '<li>%s</li>'
-
-        def field_render(self, field):
-            if 'id' in field.attrs:
-                label_for = ' for="%s_%s"' % (field.attrs['id'], field.index)
-            else:
-                label_for = ''
-            choice_label = conditional_escape(force_text(field.choice_label))
-
-            return mark_safe('%s <label%s>%s</label>' % (field.tag(), label_for, choice_label))
-
-        def render(self):
-            return mark_safe(self.UL_HTML % '\n'.join(
-                [self.LI_HTML % force_text(self.field_render(w)) for w in self]))
+        template_name = 'thorbanks/payment_widget.html'
+        option_template_name = 'thorbanks/input_option.html'
 
     def __init__(self, *args, **kwargs):
         self.banklink_order_overwrite = kwargs.pop('banklink_order_overwrite', dict())
@@ -326,8 +302,8 @@ class PaymentFormMixin(object):
 
     @classmethod
     def get_bank_name_field(cls):
-        return forms.ChoiceField(label='', required=True,
-                                 widget=forms.RadioSelect(renderer=cls.BankNameFieldRenderer))
+        return forms.ChoiceField(label='Bank name', required=True,
+                                 widget=cls.BankNameFieldWidget())
 
     def get_payment_method_choices(self, all_payment_methods):
         payment_choices = []

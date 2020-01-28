@@ -1,11 +1,9 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 
-@python_2_unicode_compatible
 class AbstractTransaction(models.Model):
     STATUS_PENDING = 'P'
     STATUS_FAILED = 'F'
@@ -37,7 +35,6 @@ class AbstractTransaction(models.Model):
         ordering = ['-last_modified']
 
 
-@python_2_unicode_compatible
 class AbstractAuthentication(models.Model):
     STATUS_PENDING = 'P'
     STATUS_FAILED = 'F'

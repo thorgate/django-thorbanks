@@ -10,7 +10,7 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^', include('shop.urls')),
 
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 ]
 
 handler500 = 'shop.views.show_server_error'

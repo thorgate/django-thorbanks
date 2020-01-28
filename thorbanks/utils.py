@@ -4,8 +4,8 @@ from functools import reduce
 from base64 import b64encode, b64decode
 import hashlib
 
-from django.core.urlresolvers import reverse
-from django.utils.encoding import force_text
+from django.urls import reverse
+from django.utils.encoding import force_str
 
 from Crypto.Hash import SHA
 from Crypto.Signature import PKCS1_v1_5
@@ -90,8 +90,8 @@ def request_digest(request, bank_name, auth=False, response=False):
     digest = ''
     for value in request:
         value_len = len(value)
-        digest += force_text(value_len).rjust(3, '0')
-        digest += force_text(value)
+        digest += force_str(value_len).rjust(3, '0')
+        digest += force_str(value)
     return digest.encode('UTF-8')
 
 
@@ -110,14 +110,14 @@ def create_signature(request, bank_name, auth=False):
     digest = request_digest(request, bank_name, auth=auth)
     key_binary = get_pkey(bank_name).sign(SHA.new(digest))
 
-    return b64encode(key_binary)
+    return force_str(b64encode(key_binary))
 
 
 def verify_signature(request, bank_name, signature, auth=False, response=False):
     """
         verify BankLink reply signature
     """
-    signature = force_text(signature)
+    signature = force_str(signature)
 
     with open(settings.get_public_key(bank_name)) as handle:
         public_key = RSA.importKey(handle.read())
