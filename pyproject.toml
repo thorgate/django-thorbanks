@@ -1,0 +1,59 @@
+[tool.poetry]
+name = "django-thorbanks"
+version = "0.6.0a0"
+description = "`django-thorbanks` provides a Django application for Estonian banklinks (iPizza protocol)."
+authors = ["Thorgate <info@thorgate.eu>"]
+license = "BSD-3-Clause"
+readme = "README.md"
+homepage = "http://thorgate.eu"
+repository = "https://github.com/thorgate/django-thorbanks"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+]
+packages = [
+    { include = "thorbanks" },
+    { include = "example" },
+    { include = "tests" }
+]
+include = [
+    "README.md",
+    "LICENSE",
+    "thorbanks/static/img/payment/*",
+    "thorbanks/templates/thorbanks/*"
+]
+exclude = ["**/migrations/*"]
+
+
+[tool.poetry.dependencies]
+python = "^3.6"
+Django = ">=1.11.27"
+PyCrypto = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "==5.*"
+coverage = "==4.*"
+coveralls = "==1.*"
+pytest-cov = "==2.*"
+pytest-django = "==3.*"
+pytest-timeout = "==1.*"
+mock = ">=1.0.1"
+tox = "==3.*"
+pytest-selenium = "==1.*"
+selenium = "==3.*"
+black = "==19.10b0"
+isort = "==4.*"
+
+
+[tool.black]
+target-version = ["py36", "py37", "py38"]
+include = "\\.pyi?$"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

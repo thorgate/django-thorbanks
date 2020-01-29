@@ -11,11 +11,12 @@ before_install:
   - export PATH=$PATH:$PWD/geckodriver
 
 install:
-  - pip install tox
-  - pip install coveralls
+  - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+  - poetry config settings.virtualenvs.create false
+  - poetry check && poetry install
 
 script:
-  - tox
+  - poetry run tox
 
 jobs:
   include:

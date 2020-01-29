@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
-
 from django.core.exceptions import ImproperlyConfigured
+
 
 try:
     from django.utils.module_loading import import_string as base_import_string
@@ -23,14 +22,16 @@ except ImportError:
 
     def get_model(app_label, model_name=None):
         if model_name is None:
-            app_label, model_name = app_label.split('.')
+            app_label, model_name = app_label.split(".")
         model = django_get_model(app_label, model_name)
         if not model:
             raise LookupError
         return model
 
     def get_registered_model(app_label, model_name):
-        model = django_get_model(app_label, model_name, seed_cache=False, only_installed=False)
+        model = django_get_model(
+            app_label, model_name, seed_cache=False, only_installed=False
+        )
         if not model:
             raise LookupError
         return model
@@ -49,7 +50,7 @@ def is_model_registered(app_label, model_name):
 
 def validate_import_string(dotted_path):
     try:
-        module_path, class_name = dotted_path.rsplit('.', 1)
+        module_path, class_name = dotted_path.rsplit(".", 1)
 
     except ValueError:
         raise ImproperlyConfigured("%s doesn't look like a module path" % dotted_path)

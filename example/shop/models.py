@@ -1,17 +1,17 @@
-from __future__ import unicode_literals
-
 import logging
 
 from django.db import models
 from django.dispatch.dispatcher import receiver
 
-from thorbanks.signals import transaction_succeeded, transaction_failed
+from thorbanks.signals import transaction_failed, transaction_succeeded
 
 
 class Order(models.Model):
     amount = models.FloatField()
 
-    transaction = models.OneToOneField('thorbanks.Transaction', null=True, on_delete=models.SET_NULL)
+    transaction = models.OneToOneField(
+        "thorbanks.Transaction", null=True, on_delete=models.SET_NULL
+    )
     is_paid = models.BooleanField(default=False)
 
     def complete(self):

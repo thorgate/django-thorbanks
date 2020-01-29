@@ -1,10 +1,7 @@
-from __future__ import unicode_literals
-
 from django import forms
 
-from thorbanks.forms import PaymentFormMixin
-
 from shop.models import Order
+from thorbanks.forms import PaymentFormMixin
 
 
 class AuthForm(PaymentFormMixin, forms.Form):
@@ -14,6 +11,6 @@ class AuthForm(PaymentFormMixin, forms.Form):
 class OrderForm(PaymentFormMixin, forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['amount']
+        fields = ["amount"]
 
     bank_name = PaymentFormMixin.get_bank_name_field()
