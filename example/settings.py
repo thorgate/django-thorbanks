@@ -12,7 +12,6 @@ from __future__ import unicode_literals
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import django
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -25,8 +24,6 @@ SECRET_KEY = '-zta41a7+#1v=uv30j%9dxtbfh9*#=dt6l(m9$ce8p20p_=n@s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -46,7 +43,7 @@ INSTALLED_APPS = (
     'shop',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -89,15 +86,24 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-TEMPLATE_DIRS = [
-    os.path.join(BASE_DIR, 'templates'),
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'debug': True,
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
 ]
-
-if django.VERSION[0] == 1 and django.VERSION[1] <= 4:
-    TEMPLATE_DIRS = [
-        os.path.join(BASE_DIR, 'legacy_templates'),
-    ] + TEMPLATE_DIRS
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]

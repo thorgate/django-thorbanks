@@ -3,13 +3,14 @@ from __future__ import unicode_literals
 import sys
 
 from django import http
-from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
 from django.views.debug import ExceptionReporter
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormView
+from django.urls import reverse
+
 from thorbanks.settings import LINKS
 
 from thorbanks.views import create_payment_request, create_auth_request, AuthResponseView, AuthError

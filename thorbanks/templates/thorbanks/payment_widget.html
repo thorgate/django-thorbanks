@@ -1,0 +1,7 @@
+<ul class="payment-options clearfix">
+    {% for group, options, index in widget.optgroups %}
+        {% for option in options %}
+            <li>{% include option.template_name with widget=option %}</li>
+        {% endfor %}
+    {% endfor %}
+</ul>

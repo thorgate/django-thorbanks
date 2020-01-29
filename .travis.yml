@@ -1,13 +1,13 @@
+# see https://docs.travis-ci.com/user/gui-and-headless-browsers/#using-xvfb-to-run-tests-that-require-a-gui
+dist: xenial
+services:
+  - xvfb
+
 language: python
 
-python:
-  - "3.5"
-
 before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
   - mkdir geckodriver
-  - wget -O - https://github.com/mozilla/geckodriver/releases/download/v0.19.0/geckodriver-v0.19.0-linux64.tar.gz | tar zxvf - -C geckodriver
+  - wget -O - https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz | tar zxvf - -C geckodriver
   - export PATH=$PATH:$PWD/geckodriver
 
 install:
@@ -17,47 +17,90 @@ install:
 script:
   - tox
 
-env:
-  matrix:
-  - TOXENV=py27-django14
-  - TOXENV=py27-django1410
-  - TOXENV=py27-django15
-  - TOXENV=py27-django16
-  - TOXENV=py27-django167
-  - TOXENV=py27-django17
-  - TOXENV=py27-django18
-  - TOXENV=py27-django19
-  - TOXENV=py34-django16
-  - TOXENV=py34-django167
-  - TOXENV=py34-django17
-  - TOXENV=py34-django18
-  - TOXENV=py34-django19
-  - TOXENV=py35-django18
-  - TOXENV=py35-django19
-
-after_success:
-  - test $TOXENV = "py35-django19" && coveralls
-
 jobs:
   include:
-    - stage: deploy
-      env: TOXENV=py35-django19
-      deploy:
-        provider: pypi
-        user: thorgate
-        password:
-          secure: >
-            U0LScBu0WYlcUTdUfNbfPNdl93AyksAWmSdxHgF925ErE2PWRy7CkGjVon+/sOT0OOmQiaLB0xnjpwF5O7hR8uhjWYcFx3YbdjRhdmM0x+Ulc
-            7pTUu7XP5skHWtfFxW1dzc3TP9P/5n4u+jj/YanduF1FC96VG/cd9OZlJJfe4zKRdJQ8o3NUvlJjJcVVAg39wSTKq6/dkxjIkHn0578CD3Kei
-            1zr5EntKfNxn4ER5lR20oHhIxPQVu2CHtrm0MvqZfAdFEpYq920fHGCFaaUpWdZ1gOpXS0O8C6uNRtPV38HBiqfEsqSY5JuRmLRh303Y+PhRn
-            WAY9GUGRnyZP8bfFOm9nE7+atKmP4sQaJals/3GHyyK4zNkYo1Lz4o7I6qpM9wMpo0y0L/OjhAyRvwvlwmSIT8MRu6Ihf+xV2br8ewBjiezDx
-            HP+gD5EC8kwMjT/fGYxwwN27SBc8jvEitb8H0yfsVHmYMmxTbGHADZLyvzLour59EaKvba0xWzXMeyxXog7kn40anZTsDQfPq0sX7QWuQruu0
-            Xk1BrTIpVXGYGqUw5sjyc7YiwkvpdCh5C+sooXVSUKfmsfZsZqJHT2lb5QHKeWyd/KrwH6nIRE6pmuK8ye/FJPc3lLiEBJlujDFmwRIWRQhTr
-            WgjxgoevQuSxwop0ANTAtPrKdoIcY=
-        on:
-          tags: true
-          distributions: sdist bdist_wheel
-          repo: thorgate/django-thorbanks
+    - python: "3.6"
+      env:
+        - TOXENV=py36-django11
+
+    - python: "3.6"
+      env:
+        - TOXENV=py36-django20
+
+    - python: "3.6"
+      env:
+        - TOXENV=py36-django21
+
+    - python: "3.6"
+      env:
+        - TOXENV=py36-django22
+
+    - python: "3.6"
+      env:
+        - TOXENV=py36-django30
+
+    - python: "3.7"
+      env:
+        - TOXENV=py37-django11
+
+    - python: "3.7"
+      env:
+        - TOXENV=py37-django20
+
+    - python: "3.7"
+      env:
+        - TOXENV=py37-django21
+
+    - python: "3.7"
+      env:
+        - TOXENV=py37-django22
+
+    - python: "3.7"
+      env:
+        - TOXENV=py37-django30
+
+    - python: "3.8"
+      env:
+        - TOXENV=py38-django11
+
+    - python: "3.8"
+      env:
+        - TOXENV=py38-django20
+
+    - python: "3.8"
+      env:
+        - TOXENV=py38-django21
+
+    - python: "3.8"
+      env:
+        - TOXENV=py38-django22
+
+    - python: "3.8"
+      env:
+        - TOXENV=py38-django30
+
+
+after_success:
+  - test $TOXENV = "py37-django30" && coveralls
+
+deploy:
+  provider: pypi
+  user: thorgate
+  password:
+    secure: >
+      U0LScBu0WYlcUTdUfNbfPNdl93AyksAWmSdxHgF925ErE2PWRy7CkGjVon+/sOT0OOmQiaLB0xnjpwF5O7hR8uhjWYcFx3YbdjRhdmM0x+Ulc
+      7pTUu7XP5skHWtfFxW1dzc3TP9P/5n4u+jj/YanduF1FC96VG/cd9OZlJJfe4zKRdJQ8o3NUvlJjJcVVAg39wSTKq6/dkxjIkHn0578CD3Kei
+      1zr5EntKfNxn4ER5lR20oHhIxPQVu2CHtrm0MvqZfAdFEpYq920fHGCFaaUpWdZ1gOpXS0O8C6uNRtPV38HBiqfEsqSY5JuRmLRh303Y+PhRn
+      WAY9GUGRnyZP8bfFOm9nE7+atKmP4sQaJals/3GHyyK4zNkYo1Lz4o7I6qpM9wMpo0y0L/OjhAyRvwvlwmSIT8MRu6Ihf+xV2br8ewBjiezDx
+      HP+gD5EC8kwMjT/fGYxwwN27SBc8jvEitb8H0yfsVHmYMmxTbGHADZLyvzLour59EaKvba0xWzXMeyxXog7kn40anZTsDQfPq0sX7QWuQruu0
+      Xk1BrTIpVXGYGqUw5sjyc7YiwkvpdCh5C+sooXVSUKfmsfZsZqJHT2lb5QHKeWyd/KrwH6nIRE6pmuK8ye/FJPc3lLiEBJlujDFmwRIWRQhTr
+      WgjxgoevQuSxwop0ANTAtPrKdoIcY=
+  distributions: sdist bdist_wheel
+  on:
+    repo: thorgate/django-thorbanks
+    tags: true
+    python: "3.7"
+    condition: "$TOXENV = py37-django30"
 
 notifications:
   email: false
