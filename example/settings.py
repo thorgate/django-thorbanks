@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "thorbanks",
+    "thorbanks_models",
     "shop",
 )
 
@@ -162,6 +163,14 @@ BANKLINKS = {
         "ORDER": 5,
     },
 }
+
+# Tell django that thorbanks migrations are in thorbanks_models app
+MIGRATION_MODULES = {
+    'thorbanks': 'thorbanks_models.migrations'
+}
+
+THORBANKS_MANUAL_MODELS = {}
+
 # Here you can customize where the bank logos are (used by the PaymentFormMixin). This is relative to STATIC_URL and
 #  must end with slash
 # BANKLINK_LOGO_PATH

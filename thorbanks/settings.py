@@ -89,18 +89,31 @@ def _configure():
 
 
 def get_model(model_name):
+    """THORBANKS_MANUAL_MODELS can be used to make thorbanks work with your custom Authentication/Transaction model
+
+    Example settings.py:
+        settings.MIGRATION_MODULES = {
+            "thorbanks": "shop.thorbanks_migrations",
+        }
+
+        settings.THORBANKS_MANUAL_MODELS = {
+            "Authentication": "shop.Authentication",
+            "Authentication": "shop.Transaction",
+        }
+
+    Example shop/models.py:
+
+        class Authentication(AbstractAuthentication):
+            class Meta:
+                app_label = 'thorbanks'
+
+        class Transaction(AbstractTransaction):
+            class Meta:
+                app_label = 'thorbanks'
+    """
     manual = getattr(settings, "THORBANKS_MANUAL_MODELS", {})
     model_full_name = manual.get(model_name, "thorbanks.%s" % model_name)
     return apps.get_model(model_full_name)
-
-
-def manual_models(model_name):
-    manual = getattr(settings, "THORBANKS_MANUAL_MODELS", {})
-
-    if isinstance(manual, (list, tuple)):
-        raise ImproperlyConfigured("THORBANKS_MANUAL_MODELS setting should now be dict")
-
-    return model_name in manual
 
 
 # Shorthand methods

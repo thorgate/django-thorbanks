@@ -8,5 +8,8 @@ class ThorbanksConfig(AppConfig):
     verbose_name = "Thorbanks"
 
     def ready(self):
+        import thorbanks.checks
+
         # Configure thorbanks settings
+        # TODO: Make system checks from these
         configure()
