@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.encoding import force_str
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from thorbanks import settings
 from thorbanks.settings import get_send_ref

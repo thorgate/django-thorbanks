@@ -1,9 +1,8 @@
 import os
 
+from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-
-from .loading import get_model as _get_model
 
 
 def _configure():
@@ -92,7 +91,7 @@ def _configure():
 def get_model(model_name):
     manual = getattr(settings, "THORBANKS_MANUAL_MODELS", {})
     model_full_name = manual.get(model_name, "thorbanks.%s" % model_name)
-    return _get_model(model_full_name)
+    return apps.get_model(model_full_name)
 
 
 def manual_models(model_name):
@@ -159,6 +158,3 @@ def configure():
     global LINKS
 
     LINKS = _configure()
-
-
-configure()
