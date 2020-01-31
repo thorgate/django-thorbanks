@@ -2,90 +2,57 @@ import os
 
 from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
 
-def _configure():
-    links = getattr(settings, "BANKLINKS", None)
+def parse_banklinks(config=None):
+    """Validates settings.BANKLINKS and add defaults
 
-    if not links:
-        raise ImproperlyConfigured("BANKLINKS not found in settings")
+    for a working example see the definitions in `example/settings.py`
+    """
+    if config is None:
+        config = settings.BANKLINKS
 
-    elif not isinstance(links, dict):
-        raise ImproperlyConfigured("settings.BANKLINKS must be dict")
+    result = {}
 
-    else:
-        res = {}
+    if isinstance(config, dict):
+        for bank_name, bank_data in config.items():
+            if isinstance(bank_data, dict):
+                final_data = {
+                    "PROTOCOL": "ipizza",
+                    "TYPE": "banklink",
+                    "ORDER": 99,
+                    "SEND_REF": True,
+                    "PUBLIC_KEY": None,
+                    "PRIVATE_KEY": None,
+                }
 
-        # Verify it contains proper data
-        for bank_name, data in links.items():
-            if len(bank_name) > 16:
-                raise ImproperlyConfigured(
-                    "Bank's name must be at most 16 characters (%s)" % bank_name
-                )
+                final_data.update(bank_data)
 
-            if not isinstance(data, dict):
-                raise ImproperlyConfigured(
-                    "Each bank in settings.BANKLINKS must correspond to dict with settings of that bank"
-                )
+                if final_data["PUBLIC_KEY"] is not None and os.path.isfile(
+                    final_data["PUBLIC_KEY"]
+                ):
+                    final_data["PUBLIC_KEY"] = os.path.abspath(final_data["PUBLIC_KEY"])
 
-            if "REQUEST_URL" not in data:
-                raise ImproperlyConfigured(
-                    "REQUEST_URL not found in settings for bank %s" % bank_name
-                )
-
-            protocol = data.get("PROTOCOL", "ipizza")
-
-            if protocol == "ipizza":
-                if "PRIVATE_KEY" not in data:
-                    raise ImproperlyConfigured(
-                        "PRIVATE_KEY not found in settings for bank %s" % bank_name
+                if final_data["PRIVATE_KEY"] is not None and os.path.isfile(
+                    final_data["PRIVATE_KEY"]
+                ):
+                    final_data["PRIVATE_KEY"] = os.path.abspath(
+                        final_data["PRIVATE_KEY"]
                     )
 
-                if "PUBLIC_KEY" not in data:
-                    raise ImproperlyConfigured(
-                        "PUBLIC_KEY not found in settings for bank %s" % bank_name
-                    )
+                result[bank_name] = final_data
 
-                if "SND_ID" in data:
-                    raise ImproperlyConfigured(
-                        "SND_ID is removed. Use CLIENT_ID instead %s" % bank_name
-                    )
+            else:
+                result[bank_name] = bank_data
 
-                if "CLIENT_ID" not in data:
-                    raise ImproperlyConfigured(
-                        "CLIENT_ID not found in settings for bank %s" % bank_name
-                    )
+    return result
 
-                if "BANK_ID" not in data:
-                    raise ImproperlyConfigured(
-                        "BANK_ID not found in settings for bank %s" % bank_name
-                    )
 
-                if not os.path.isfile(data["PRIVATE_KEY"]):
-                    raise ImproperlyConfigured(
-                        "Private key file %s for bank %s does not exist."
-                        % (data["PRIVATE_KEY"], bank_name)
-                    )
+def get_model_name(model_name):
+    manual = getattr(settings, "THORBANKS_MANUAL_MODELS", {})
+    model_full_name = manual.get(model_name, None)
 
-                if not os.path.isfile(data["PUBLIC_KEY"]):
-                    raise ImproperlyConfigured(
-                        "Public key file %s for bank %s does not exist."
-                        % (data["PUBLIC_KEY"], bank_name)
-                    )
-
-                data["PUBLIC_KEY"] = os.path.abspath(data["PUBLIC_KEY"])
-                data["PRIVATE_KEY"] = os.path.abspath(data["PRIVATE_KEY"])
-
-            elif protocol == "nordea":
-                if "MAC_KEY" not in data:
-                    raise ImproperlyConfigured(
-                        "MAC_KEY not found in settings for bank %s" % bank_name
-                    )
-
-            res[bank_name] = data
-
-    return res
+    return model_full_name
 
 
 def get_model(model_name):
@@ -111,63 +78,85 @@ def get_model(model_name):
             class Meta:
                 app_label = 'thorbanks'
     """
-    manual = getattr(settings, "THORBANKS_MANUAL_MODELS", {})
-    model_full_name = manual.get(model_name, "thorbanks.%s" % model_name)
+    model_full_name = get_model_name(model_name) or "thorbanks_models.%s" % model_name
     return apps.get_model(model_full_name)
 
 
 # Shorthand methods
 def get_private_key(the_bank):
-    return LINKS[the_bank]["PRIVATE_KEY"]
+    return get_links()[the_bank]["PRIVATE_KEY"]
 
 
 def get_public_key(the_bank):
-    return LINKS[the_bank]["PUBLIC_KEY"]
+    """
+
+    Note: To extract a public key out of a bank certificate use the following command:
+
+        $ openssl x509 -pubkey -noout -in cert.pem  > pubkey.pem
+    """
+    return get_links()[the_bank]["PUBLIC_KEY"]
 
 
 def get_client_id(the_bank):
-    return LINKS[the_bank]["CLIENT_ID"]
+    return get_links()[the_bank]["CLIENT_ID"]
 
 
 def get_bank_id(the_bank):
-    return LINKS[the_bank]["BANK_ID"]
+    return get_links()[the_bank]["BANK_ID"]
 
 
 def get_request_url(the_bank):
-    return LINKS[the_bank]["REQUEST_URL"]
+    return get_links()[the_bank]["REQUEST_URL"]
 
 
 def get_link_type(the_bank):
-    return LINKS[the_bank]["TYPE"]
+    return get_links()[the_bank]["TYPE"]
 
 
 def get_link_protocol(the_bank):
-    return LINKS[the_bank].get("PROTOCOL", "ipizza")
+    return get_links()[the_bank]["PROTOCOL"]
 
 
 def get_send_ref(the_bank):
-    return LINKS[the_bank].get("SEND_REF", True)
+    return get_links()[the_bank]["SEND_REF"]
 
 
 def get_bank_choices():
     """ Returns list of (bank_name, pretty_name, image_path, order) tuples.
+
     Useful in forms
     """
+    links = get_links()
+
     return [
         (
             the_bank,
-            LINKS[the_bank].get("PRINTABLE_NAME", the_bank),
-            LINKS[the_bank].get("IMAGE_PATH", the_bank),
-            LINKS[the_bank].get("ORDER", 99),
+            links[the_bank].get("PRINTABLE_NAME", the_bank),
+            links[the_bank].get("IMAGE_PATH", the_bank),
+            links[the_bank].get("ORDER", 99),
         )
-        for the_bank in LINKS.keys()
+        for the_bank in links
     ]
 
 
-LINKS = {}
+# Updated by configure method below. Do not use directly and access this value trough get_links method
+_LINKS = None
 
 
-def configure():
-    global LINKS
+def get_links():
+    global _LINKS
 
-    LINKS = _configure()
+    if _LINKS is None:
+        configure()
+
+    return _LINKS
+
+
+def configure(__only_use_during_tests=None):
+    global _LINKS
+
+    _LINKS = parse_banklinks()
+
+    if isinstance(__only_use_during_tests, dict):
+        for k, v in __only_use_during_tests.items():
+            _LINKS[k].update(v)

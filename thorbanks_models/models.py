@@ -2,10 +2,8 @@ from thorbanks.abstract_models import AbstractAuthentication, AbstractTransactio
 
 
 class Authentication(AbstractAuthentication):
-    class Meta:
-        app_label = 'thorbanks'
+    pass
 
 
 class Transaction(AbstractTransaction):
-    class Meta:
-        app_label = 'thorbanks'
+    pass

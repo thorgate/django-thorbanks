@@ -21,17 +21,22 @@ isort-fix:
 	$(MAKE) isort-run
 
 
+prospector:
+	prospector .
+
+
 quality:
 	$(MAKE) black cmd='--check'
 	$(MAKE) isort
+	$(MAKE) prospector
 
 
 test:
-	py.test $(LIVESERVER) $(DRIVER)
+	py.test $(LIVESERVER) $(DRIVER) $(cmd)
 
 
 test-coverage:
-	py.test $(LIVESERVER) $(DRIVER) $(COVERAGE)
+	py.test $(LIVESERVER) $(DRIVER) $(COVERAGE) $(cmd)
 
 
 full:

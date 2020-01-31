@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(__file__)
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "-zta41a7+#1v=uv30j%9dxtbfh9*#=dt6l(m9$ce8p20p_=n@s"
+SECRET_KEY = "-zta41a7+#1v=uv30j%9dxtbfh9*#=dt6l(m9$ce8p20p_=n@s"  # NOQA
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -136,18 +136,18 @@ BANKLINKS = {
         "BANK_ID": "SAMPOPANK",
         "PRIVATE_KEY": os.path.join(BASE_DIR, "..", "certs", "danske_key.pem"),
         "PUBLIC_KEY": os.path.join(BASE_DIR, "..", "certs", "danske_pub.pem"),
-        "ENCODING": "ISO-8859-1",
         "TYPE": "banklink",
         "IMAGE_PATH": "danske.png",
         "ORDER": 3,
     },
     "nordea": {
         "PRINTABLE_NAME": "Nordea",
-        "REQUEST_URL": "https://netbank.nordea.com/pnbeidtest/eid.jsp",
-        "CLIENT_ID": "87654321",
-        "MAC_KEY": "LEHTI",
+        "REQUEST_URL": "http://banks.maximum.thorgate.eu/banklink/ipizza",
+        "CLIENT_ID": "uid100078",
+        "BANK_ID": "NORDEA",
+        "PRIVATE_KEY": os.path.join(BASE_DIR, "..", "certs", "nordea_key.pem"),
+        "PUBLIC_KEY": os.path.join(BASE_DIR, "..", "certs", "nordea_pub.pem"),
         "TYPE": "banklink",
-        "PROTOCOL": "nordea",
         "IMAGE_PATH": "nordea.png",
         "ORDER": 4,
     },
@@ -165,9 +165,7 @@ BANKLINKS = {
 }
 
 # Tell django that thorbanks migrations are in thorbanks_models app
-MIGRATION_MODULES = {
-    'thorbanks': 'thorbanks_models.migrations'
-}
+MIGRATION_MODULES = {"thorbanks_models": "shop.thorbanks_migrations"}
 
 THORBANKS_MANUAL_MODELS = {}
 

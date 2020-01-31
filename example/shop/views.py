@@ -9,9 +9,7 @@ from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormView
 
-from shop.forms import AuthForm, OrderForm
-from shop.models import Order
-from thorbanks.settings import LINKS
+from thorbanks.settings import _LINKS, get_links, configure
 from thorbanks.utils import pingback_url
 from thorbanks.views import (
     AuthError,
@@ -19,6 +17,9 @@ from thorbanks.views import (
     create_auth_request,
     create_payment_request,
 )
+
+from .forms import AuthForm, OrderForm
+from .models import Order
 
 
 class FrontpageView(TemplateView):
@@ -37,16 +38,21 @@ class PaymentView(CreateView):
         redirect_url = reverse("order-success", kwargs={"pk": self.object.id})
         redirect_on_failure_url = reverse("order-failed", kwargs={"pk": self.object.id})
 
+        bank_name = form.cleaned_data["bank_name"]
+
         # Allow overwriting of send_ref value via url param (this is for unittests)
         # WARNING: Don't use this in production code
-        old_val = LINKS[form.cleaned_data["bank_name"]].get("SEND_REF", True)
-        LINKS[form.cleaned_data["bank_name"]]["SEND_REF"] = (
-            self.request.GET.get("send_ref", "1") == "1"
-        )
+        old_val = get_links()[bank_name].get("SEND_REF", True)
+        send_ref = self.request.GET.get("send_ref", "1") == "1"
+        configure(__only_use_during_tests={
+            bank_name: {
+                "SEND_REF": send_ref,
+            }
+        })
 
         # Create new payment request
         payment = create_payment_request(
-            bank_name=form.cleaned_data["bank_name"],
+            bank_name=bank_name,
             message="My cool payment",
             amount=form.cleaned_data["amount"],
             currency="EUR",
@@ -56,7 +62,11 @@ class PaymentView(CreateView):
         )
 
         # restore old SEND_REF value
-        LINKS[form.cleaned_data["bank_name"]]["SEND_REF"] = old_val
+        configure(__only_use_during_tests={
+            bank_name: {
+                "SEND_REF": old_val,
+            }
+        })
 
         # Attach the pending transaction object to the Order object
         self.object.transaction = payment.transaction

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-
+import decimal
 import random
 import time
 
@@ -30,7 +29,7 @@ from tests.utils import (
 @pytest.mark.timeout(TIMEOUT)
 def test_payment_flow(bank_name, send_ref, live_server, selenium):
     from shop.models import Order
-    from thorbanks.models import Transaction
+    from thorbanks_models.models import Transaction
 
     assert bank_name in IPIZZA_BANKS
 
@@ -117,6 +116,6 @@ def test_payment_flow(bank_name, send_ref, live_server, selenium):
     assert order.transaction_id
 
     assert order.transaction.bank_name == bank_name
-    assert order.transaction.amount == round(amount, 2)
+    assert order.transaction.amount == decimal.Decimal(str(round(amount, 2)))
     assert order.transaction.currency == "EUR"
     assert order.transaction.status == Transaction.STATUS_COMPLETED

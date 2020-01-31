@@ -49,6 +49,7 @@ pytest-selenium = "==1.*"
 selenium = "==3.*"
 black = "==19.10b0"
 isort = "==4.*"
+prospector = "==1.*"
 
 
 [tool.black]

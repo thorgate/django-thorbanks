@@ -16,7 +16,7 @@ class AbstractTransaction(models.Model):
     description = models.CharField(
         _("reference description"), max_length=255, help_text=_("reference description")
     )
-    amount = models.FloatField(_("amount"))
+    amount = models.DecimalField(_("amount"), decimal_places=2, max_digits=9)
     currency = models.CharField(_("currency"), max_length=3)
     created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -27,7 +27,7 @@ class AbstractTransaction(models.Model):
     redirect_on_failure = models.CharField(max_length=255, editable=False)
 
     def __str__(self):
-        return "Transaction %s - %s %.2f from %s [%s]" % (
+        return _("Transaction {} - {} {:.2f} from {} [{}]").format(
             self.id,
             self.currency,
             self.amount,
@@ -37,7 +37,6 @@ class AbstractTransaction(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "thorbanks"
         verbose_name = _("transaction")
         ordering = ["-last_modified"]
 
@@ -71,6 +70,5 @@ class AbstractAuthentication(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "thorbanks"
         verbose_name = _("Authentication")
         ordering = ["-last_modified"]

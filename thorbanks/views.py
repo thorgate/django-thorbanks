@@ -2,20 +2,19 @@ import logging
 
 from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.shortcuts import get_object_or_404
-from django.utils.crypto import constant_time_compare
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
 from thorbanks import settings
-from thorbanks.forms import IPizzaAuthRequest, NordeaAuthRequest, PaymentRequest
+from thorbanks.forms import IPizzaAuthRequest, PaymentRequest
 from thorbanks.signals import (
     auth_failed,
     auth_succeeded,
     transaction_failed,
     transaction_succeeded,
 )
-from thorbanks.utils import nordea_generate_mac, verify_signature
+from thorbanks.utils import verify_signature
 
 
 logger = logging.getLogger(__name__)
@@ -24,8 +23,8 @@ logger = logging.getLogger(__name__)
 def get_request_data(request):
     if request.method == "POST":
         return request.POST
-    else:
-        return request.GET
+
+    return request.GET
 
 
 class PaymentError(Exception):
@@ -83,14 +82,13 @@ def response(request):
         # This is automatic pingback from the bank - send simple 200 response as text/plain.
         return HttpResponse("request handled", content_type="text/plain")
 
+    # This request is from the user after being redirected from the bank to our server. Redirect her further.
+    if data["VK_SERVICE"] == "1111":
+        url = transaction.redirect_after_success
     else:
-        # This request is from the user after being redirected from the bank to our server. Redirect her further.
-        if data["VK_SERVICE"] == "1111":
-            url = transaction.redirect_after_success
-        else:
-            url = transaction.redirect_on_failure
+        url = transaction.redirect_on_failure
 
-        return HttpResponseRedirect(url)
+    return HttpResponseRedirect(url)
 
 
 def create_payment_request(
@@ -110,7 +108,6 @@ def create_payment_request(
 def create_auth_request(request, bank_name, response_url, redirect_to=None):
     request_form_classes = {
         "ipizza": IPizzaAuthRequest,
-        "nordea": NordeaAuthRequest,
     }
     form_cls = request_form_classes.get(settings.get_link_protocol(bank_name))
     if form_cls is None:
@@ -137,8 +134,6 @@ class AuthResponseView(View):
 
         if "VK_MAC" in self.data:
             self.handle_ipizza(request)
-        elif "B02K_MAC" in self.data:
-            self.handle_nordea(request)
         else:
             raise AuthError("Invalid request (unknown protocol)")
 
@@ -189,57 +184,6 @@ class AuthResponseView(View):
 
         self.data["name"] = self.data.get("VK_USER_NAME")
         self.data["person_code"] = self.data.get("VK_USER_ID")
-
-    def handle_nordea(self, request):
-        klass = settings.get_model("Authentication")
-        auth = get_object_or_404(klass, pk=self.data.get("B02K_STAMP", None))
-
-        # Set proper encoding (Nordea supports only ISO-8859-1) and get the data again (this time in correct encoding)
-        request.encoding = "ISO-8859-1"
-
-        # We have to manually replace GET and POST after changing encoding because of a Django bug (?)
-        request.POST = QueryDict(request.body, encoding=request.encoding)
-        request.GET = QueryDict(
-            request.META.get("QUERY_STRING", ""), encoding=request.encoding
-        )
-        self.data = get_request_data(request)
-        self.data = self.data.dict()
-
-        # Calculate message's MAC and compare it to the one sent to us
-        link_config = settings.LINKS[auth.bank_name]
-        mac_key = link_config["MAC_KEY"]
-        mac_token_fields = (
-            "B02K_VERS",
-            "B02K_TIMESTMP",
-            "B02K_IDNBR",
-            "B02K_STAMP",
-            "B02K_CUSTNAME",
-            "B02K_KEYVERS",
-            "B02K_ALG",
-            "B02K_CUSTID",
-            "B02K_CUSTTYPE",
-        )
-        mac = nordea_generate_mac(self.data, mac_token_fields, mac_key)
-        if not constant_time_compare(mac, self.data["B02K_MAC"]):
-            raise AuthError("Invalid signature. ")
-
-        # This is the same as what we send in the auth request and we only support 0002 ATM
-        assert self.data["B02K_VERS"] == "0002"
-
-        # Nordea only sends success messages
-        if auth.status == klass.STATUS_PENDING:
-            # Mark auth as complete
-            auth.raw_response = self.data
-            auth.status = klass.STATUS_COMPLETED
-            auth.save()
-            auth_succeeded.send(klass, auth=auth)
-
-        self.url = auth.redirect_after_success
-
-        self.auth = auth
-
-        self.data["name"] = self.data.get("B02K_CUSTNAME")
-        self.data["person_code"] = self.data.get("B02K_CUSTID")
 
     def get(self, request, *args, **kwargs):
         return HttpResponseRedirect(self.url)

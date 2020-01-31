@@ -1,0 +1,17 @@
+ignore-paths:
+    - .tox
+    - cover
+    - dist
+    - .cache
+
+pep8:
+    options:
+        max-line-length: 120
+
+
+pylint:
+    disable:
+        - too-many-arguments
+        - unused-argument
+    options:
+        max-line-length: 120

@@ -1,7 +1,8 @@
 from django import forms
 
-from shop.models import Order
 from thorbanks.forms import PaymentFormMixin
+
+from .models import Order
 
 
 class AuthForm(PaymentFormMixin, forms.Form):

@@ -10,11 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from thorbanks import settings
 from thorbanks.settings import get_send_ref
 from thorbanks.signals import transaction_started
-from thorbanks.utils import (
-    calculate_731_checksum,
-    create_signature,
-    nordea_generate_mac,
-)
+from thorbanks.utils import calculate_731_checksum, create_signature
 
 
 class AuthRequestBase(forms.Form):
@@ -36,7 +32,7 @@ class AuthRequestBase(forms.Form):
         if not self.is_valid():
             raise RuntimeError("signature is invalid")  # pragma no cover
 
-    def prepare(self, *args, **kwargs):
+    def prepare(self, bank_name, redirect_to, response_url, *args, **kwargs):
         raise NotImplementedError  # pragma no cover
 
     def finalize(self):
@@ -107,57 +103,6 @@ class IPizzaAuthRequest(AuthRequestBase):
         self.data["VK_MAC"] = mac
 
 
-class NordeaAuthRequest(AuthRequestBase):
-    A01Y_ACTION_ID = forms.CharField(widget=forms.HiddenInput())
-    A01Y_VERS = forms.CharField(widget=forms.HiddenInput())
-    A01Y_RCVID = forms.CharField(widget=forms.HiddenInput())
-    A01Y_LANGCODE = forms.CharField(widget=forms.HiddenInput())
-    A01Y_STAMP = forms.CharField(widget=forms.HiddenInput())
-    A01Y_IDTYPE = forms.CharField(widget=forms.HiddenInput())
-    A01Y_RETLINK = forms.CharField(widget=forms.HiddenInput())
-    A01Y_CANLINK = forms.CharField(widget=forms.HiddenInput())
-    A01Y_REJLINK = forms.CharField(widget=forms.HiddenInput())
-    A01Y_KEYVERS = forms.CharField(widget=forms.HiddenInput())
-    A01Y_ALG = forms.CharField(widget=forms.HiddenInput())
-    A01Y_MAC = forms.CharField(widget=forms.HiddenInput(), required=False)
-
-    def prepare(self, bank_name, redirect_to, response_url, *args, **kwargs):
-        initial = {
-            "A01Y_ACTION_ID": "701",
-            "A01Y_VERS": "0002",
-            "A01Y_RCVID": settings.get_client_id(bank_name),
-            "A01Y_LANGCODE": "ET",
-            "A01Y_STAMP": self.auth.pk,
-            "A01Y_IDTYPE": "02",
-            "A01Y_RETLINK": response_url,
-            "A01Y_CANLINK": response_url,
-            "A01Y_REJLINK": response_url,
-            "A01Y_KEYVERS": "0001",  # TODO: support multiple keys
-            "A01Y_ALG": "01",  # We use MD5 to calculate MAC since nordea LIVE does not like SHA1
-        }
-        return initial
-
-    def finalize(self):
-        mac_token_fields = (
-            "A01Y_ACTION_ID",
-            "A01Y_VERS",
-            "A01Y_RCVID",
-            "A01Y_LANGCODE",
-            "A01Y_STAMP",
-            "A01Y_IDTYPE",
-            "A01Y_RETLINK",
-            "A01Y_CANLINK",
-            "A01Y_REJLINK",
-            "A01Y_KEYVERS",
-            "A01Y_ALG",
-        )
-        link_config = settings.LINKS[self.auth.bank_name]
-        mac_key = link_config["MAC_KEY"]
-        mac = nordea_generate_mac(self.cleaned_data, mac_token_fields, mac_key)
-
-        self.data["A01Y_MAC"] = mac
-
-
 class PaymentRequestBase(forms.Form):
     def __init__(self, *args, **kwargs):
         self.transaction = settings.get_model("Transaction")()
@@ -186,8 +131,7 @@ class PaymentRequestBase(forms.Form):
         if not self.is_valid():
             raise RuntimeError("signature is invalid")
 
-    @classmethod
-    def prepare(cls, transaction, url, language="EST"):
+    def prepare(self, transaction, url, language="EST"):
         raise NotImplementedError
 
     def finalize(self):
@@ -250,14 +194,13 @@ class PaymentRequest(PaymentRequestBase):
     VK_LANG = forms.CharField(widget=forms.HiddenInput())
     VK_ENCODING = forms.CharField(widget=forms.HiddenInput())
 
-    @classmethod
-    def prepare(cls, transaction, url, language="EST"):
+    def prepare(self, transaction, url, language="EST"):
         assert language in ["EST", "ENG", "RUS"]
 
         return {
             "VK_SERVICE": "1012",
             "VK_VERSION": "008",
-            "VK_ENCODING": "UTF-8",
+            "VK_ENCODING": self.get_encoding(),
             "VK_DATETIME": transaction.created.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "VK_RETURN": url,
             "VK_CANCEL": url,
@@ -278,7 +221,7 @@ class PaymentRequest(PaymentRequestBase):
         )
 
 
-class PaymentFormMixin(object):
+class PaymentFormMixin:
     """
     Base form mixin that lets the user choose the bank used for payment.
     Note that you MUST add bank_name field to your form class, you can use `get_bank_name_field()` method to get a field

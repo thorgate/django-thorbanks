@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-
-
+import os
 import random
 from base64 import b64decode, b64encode
 
-from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 
@@ -12,10 +10,18 @@ import pytest
 
 from Crypto.Hash import SHA
 
-from tests.utils import assert_ex_msg
 from thorbanks import settings as th_settings
+from thorbanks.checks import check_banklink_settings
 from thorbanks.forms import PaymentRequest
 from thorbanks.utils import get_pkey, pingback_url, request_digest
+
+
+def only_issue_ids(issues):
+    """
+    :param issues: list[CheckMessage]
+    :return: list[string]
+    """
+    return [x.id for x in issues]
 
 
 def get_banklink_config(bank_name=None, printable_name=None):
@@ -78,50 +84,33 @@ def get_banklink_config(bank_name=None, printable_name=None):
 def test_no_settings_raises_exception(settings):
     settings.BANKLINKS = None
 
-    with pytest.raises(ImproperlyConfigured) as e:
-        th_settings.configure()
-
-    assert_ex_msg(e, "BANKLINKS not found in settings")
+    assert only_issue_ids(check_banklink_settings(None)) == [
+        "thorbanks.E004",
+    ]
 
 
 def test_banklinks_is_not_dict(settings):
     settings.BANKLINKS = True
 
-    with pytest.raises(ImproperlyConfigured) as e:
-        th_settings.configure()
-
-    assert_ex_msg(e, "settings.BANKLINKS must be dict")
+    assert only_issue_ids(check_banklink_settings(None)) == [
+        "thorbanks.E004",
+    ]
 
 
 def test_banklink_name_too_long(settings):
     settings.BANKLINKS = get_banklink_config(bank_name="ABCDEFGHIJKLMNOPS")
 
-    with pytest.raises(ImproperlyConfigured) as e:
-        th_settings.configure()
-
-    assert_ex_msg(e, "Bank's name must be at most 16 characters (ABCDEFGHIJKLMNOPS)")
+    assert only_issue_ids(check_banklink_settings(None)) == [
+        "thorbanks.E005",
+    ]
 
 
 def test_banklink_data_not_dict(settings):
     settings.BANKLINKS = {"swedbank": None}
 
-    with pytest.raises(ImproperlyConfigured) as e:
-        th_settings.configure()
-
-    assert_ex_msg(
-        e,
-        "Each bank in settings.BANKLINKS must correspond to dict with settings of that bank",
-    )
-
-
-def test_deprecated_keys(settings):
-    settings.BANKLINKS = get_banklink_config()
-    settings.BANKLINKS["swedbank"]["SND_ID"] = "123"
-
-    with pytest.raises(ImproperlyConfigured) as e:
-        th_settings.configure()
-
-    assert_ex_msg(e, "SND_ID is removed. Use CLIENT_ID instead swedbank")
+    assert only_issue_ids(check_banklink_settings(None)) == [
+        "thorbanks.E006",
+    ]
 
 
 @pytest.mark.parametrize(
@@ -131,10 +120,9 @@ def test_missing_keys(settings, missing_key):
     settings.BANKLINKS = get_banklink_config()
     del settings.BANKLINKS["swedbank"][missing_key]
 
-    with pytest.raises(ImproperlyConfigured) as e:
-        th_settings.configure()
-
-    assert_ex_msg(e, "%s not found in settings for bank swedbank" % missing_key)
+    assert only_issue_ids(check_banklink_settings(None)) == [
+        "thorbanks.E007",
+    ]
 
 
 @pytest.mark.parametrize("key_type", ["private", "public"])
@@ -144,14 +132,9 @@ def test_no_key_file(settings, key_type):
     settings.BANKLINKS = get_banklink_config()
     settings.BANKLINKS["swedbank"]["%s_KEY" % key_type.upper()] = file_name
 
-    with pytest.raises(ImproperlyConfigured) as e:
-        th_settings.configure()
-
-    assert_ex_msg(
-        e,
-        "%s%s key file %s for bank swedbank does not exist."
-        % (key_type[0].upper(), key_type[1:].lower(), file_name),
-    )
+    assert only_issue_ids(check_banklink_settings(None)) == [
+        "thorbanks.{}".format("E009" if key_type == "private" else "E008"),
+    ]
 
 
 def test_getters(settings):
@@ -159,8 +142,12 @@ def test_getters(settings):
     settings.BANKLINKS = conf
     th_settings.configure()
 
-    assert th_settings.get_private_key("swedbank") == conf["swedbank"]["PRIVATE_KEY"]
-    assert th_settings.get_public_key("swedbank") == conf["swedbank"]["PUBLIC_KEY"]
+    assert th_settings.get_private_key("swedbank") == os.path.abspath(
+        conf["swedbank"]["PRIVATE_KEY"]
+    )
+    assert th_settings.get_public_key("swedbank") == os.path.abspath(
+        conf["swedbank"]["PUBLIC_KEY"]
+    )
     assert th_settings.get_client_id("swedbank") == conf["swedbank"]["CLIENT_ID"]
     assert th_settings.get_request_url("swedbank") == conf["swedbank"]["REQUEST_URL"]
     assert th_settings.get_link_type("swedbank") == conf["swedbank"]["TYPE"]
