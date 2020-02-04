@@ -44,6 +44,15 @@ def check_model_settings(app_configs, **kwargs):
                 )
             )
 
+        if "thorbanks_models" in settings.INSTALLED_APPS:
+            issues.append(
+                Error(
+                    "thorbanks_models should not be added to "
+                    "settings.INSTALLED_APPS when using THORBANKS_MANUAL_MODELS",
+                    id="thorbanks.E011",
+                )
+            )
+
     return issues
 
 

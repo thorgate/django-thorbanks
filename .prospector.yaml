@@ -3,6 +3,7 @@ ignore-paths:
     - cover
     - dist
     - .cache
+    - example/wsgi.py
 
 pep8:
     options:

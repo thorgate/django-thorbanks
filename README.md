@@ -20,7 +20,7 @@ Nordea          | iPizza      | :heavy_check_mark:  | :heavy_check_mark:
 
 ## Usage
 
-### Install it:
+### 1. Install it:
 
 **Pip:**
 
@@ -40,7 +40,7 @@ pipenv install django-thorbanks
 poetry add django-thorbanks
 ```
 
-### Add to installed apps
+### 2. Add to installed apps
 
 ```python
 INSTALLED_APPS = (
@@ -50,9 +50,16 @@ INSTALLED_APPS = (
 )
 ```
 
-If you want to use custom models for banklinks/authentication continue then follow instructions from [thorbanks.settings.get_model](./thorbanks/settings.py#L48). Otherwise you can continue with the next step.
+### 3. Configure and create migrations:
 
-Finally, make django aware that thorbanks migrations are in your local appps folder via settings.MIGRATION_MODULES:
+**With MANUAL_MODELS:**
+
+- Remove `"thorbanks_models"` from `INSTALLED_APPS`
+- follow instructions from [thorbanks.settings.get_model](./thorbanks/settings.py#L59).
+
+**With default models:**
+
+Make django aware that thorbanks migrations are in your local apps folder via settings.MIGRATION_MODULES:
 
 > Note: Replace `shop` with the name of an existing app in your project.
 
@@ -61,4 +68,31 @@ Finally, make django aware that thorbanks migrations are in your local appps fol
 MIGRATION_MODULES = {"thorbanks": "shop.thorbanks_models.migrations"}
 ```
 
-For instructions how to continue with integration see [shop app](example/shop/urls.py) in the example project.
+### 4. Link it to your Order model
+
+> Note: When using MANUAL_MODELS replace `thorbanks_models` with your local app name
+
+```python
+class Order(models.Model):
+    # ... other fields
+    transaction = models.OneToOneField(
+        "thorbanks_models.Transaction", null=True, on_delete=models.SET_NULL
+    )
+```
+
+### 5. Include thorbanks urls
+
+```python
+urlpatterns = [
+    # This is where the user will be redirected after returning from the banklink page
+    url(r"^banks/", include("thorbanks.urls")),
+]
+```
+
+### 6. Add listeners to banklinks success & failure callbacks:
+
+See [example.shop.models.banklink_success_callback](example/shop/models.py#L23) and [example.shop.models.banklink_failed_callback](example/shop/models.py#L44).
+
+### 7. Create views and forms for payments:
+
+see [example.shop.views](example/shop/views.py) and [example.shop.views](example/shop/forms.py).

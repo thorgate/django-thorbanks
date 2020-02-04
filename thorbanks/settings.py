@@ -58,17 +58,19 @@ def get_model_name(model_name):
 def get_model(model_name):
     """THORBANKS_MANUAL_MODELS can be used to make thorbanks work with your custom Authentication/Transaction model
 
-    Example settings.py:
-        settings.MIGRATION_MODULES = {
-            "thorbanks": "shop.thorbanks_migrations",
+    Example settings:
+        # Note: Make sure that "thorbanks_models" is not in INSTALLED_APPS
+
+        MIGRATION_MODULES = {
+            "thorbanks": "myapp.thorbanks_migrations",
         }
 
-        settings.THORBANKS_MANUAL_MODELS = {
-            "Authentication": "shop.Authentication",
-            "Authentication": "shop.Transaction",
+        THORBANKS_MANUAL_MODELS = {
+            "Authentication": "myapp.Authentication",
+            "Authentication": "myapp.Transaction",
         }
 
-    Example shop/models.py:
+    Example myapp/models.py:
 
         class Authentication(AbstractAuthentication):
             class Meta:
