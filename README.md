@@ -96,3 +96,11 @@ See [example.shop.models.banklink_success_callback](example/shop/models.py#L23) 
 ### 7. Create views and forms for payments:
 
 see [example.shop.views](example/shop/views.py) and [example.shop.views](example/shop/forms.py).
+
+## iPizza protocol
+
+- [Test service](https://banks.maximum.thorgate.eu/et/info)
+- [Swedbank](https://www.swedbank.ee/business/cash/ecommerce/ecommerce?language=EST)
+    - [Spec](https://www.swedbank.ee/static/pdf/business/d2d/paymentcollection/Pangalingi_paringute_tehniline_spetsifikatsioon_09_10_2014.pdf)
+- [SEB](https://www.seb.ee/ariklient/igapaevapangandus/maksete-kogumine/maksete-kogumine-internetis/pangalingi-tehniline)
+- [LHV Bank](https://www.lhv.ee/pangateenused/pangalink/)
