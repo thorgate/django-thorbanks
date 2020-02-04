@@ -4,9 +4,10 @@ from functools import reduce
 from django.urls import reverse
 from django.utils.encoding import force_str
 
-from Crypto.Hash import SHA
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 
 from thorbanks import settings
 
@@ -130,11 +131,12 @@ def request_digest(request, bank_name, auth=False, response=False):
 
 
 def get_pkey(bank_name):
-    with open(settings.get_private_key(bank_name)) as handle:
-        private_key = RSA.importKey(handle.read())
-        handle.close()
+    with open(settings.get_private_key(bank_name), "rb") as handle:
+        private_key = serialization.load_pem_private_key(
+            handle.read(), password=None, backend=default_backend()
+        )
 
-    return PKCS1_v1_5.new(private_key)
+    return private_key
 
 
 def create_signature(request, bank_name, auth=False):
@@ -142,9 +144,11 @@ def create_signature(request, bank_name, auth=False):
         sign BankLink request in dict format with private_key
     """
     digest = request_digest(request, bank_name, auth=auth)
-    key_binary = get_pkey(bank_name).sign(SHA.new(digest))
 
-    return force_str(b64encode(key_binary))
+    private_key = get_pkey(bank_name)
+    signature = private_key.sign(digest, padding.PKCS1v15(), hashes.SHA1())
+
+    return force_str(b64encode(signature))
 
 
 def verify_signature(request, bank_name, signature, auth=False, response=False):
@@ -153,14 +157,20 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
     """
     signature = force_str(signature)
 
-    with open(settings.get_public_key(bank_name)) as handle:
-        public_key = RSA.importKey(handle.read())
-        handle.close()
+    with open(settings.get_public_key(bank_name), "rb") as handle:
+        public_key = serialization.load_pem_public_key(handle.read(), default_backend())
 
-    the_key = PKCS1_v1_5.new(public_key)
     digest = request_digest(request, bank_name, auth=auth, response=response)
 
-    return the_key.verify(SHA.new(digest), b64decode(signature))
+    try:
+        public_key.verify(
+            b64decode(signature), digest, padding.PKCS1v15(), hashes.SHA1()
+        )
+
+        return True
+
+    except InvalidSignature:
+        return False
 
 
 def weight_generator():

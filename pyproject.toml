@@ -33,7 +33,6 @@ exclude = ["**/migrations/*"]
 [tool.poetry.dependencies]
 python = "^3.6"
 Django = ">=1.11.27"
-PyCrypto = "*"
 cryptography = "==2.*"
 
 [tool.poetry.dev-dependencies]

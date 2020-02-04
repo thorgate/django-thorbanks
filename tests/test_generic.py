@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import hashlib
 import os
 import random
 from base64 import b64decode, b64encode
@@ -8,7 +9,8 @@ from django.utils.encoding import force_bytes, force_str
 
 import pytest
 
-from Crypto.Hash import SHA
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
 
 from thorbanks import settings as th_settings
 from thorbanks.checks import check_banklink_settings
@@ -225,9 +227,12 @@ def test_payment_result(settings):
         request_digest(request.cleaned_data, request.transaction.bank_name)
         == expected_digest
     )
-    assert request["VK_MAC"].value() == force_str(
-        b64encode(get_pkey("swedbank").sign(SHA.new(expected_digest)))
+
+    expected_mac = get_pkey("swedbank").sign(
+        expected_digest, padding.PKCS1v15(), hashes.SHA1()
     )
+
+    assert request["VK_MAC"].value() == force_str(b64encode(expected_mac))
 
     assert (
         len(b64decode(request["VK_MAC"].value())) == 256
