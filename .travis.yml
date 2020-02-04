@@ -17,7 +17,7 @@ install:
   - poetry check && poetry install
 
 script:
-  - poetry run tox
+  - tox
 
 jobs:
   include:
