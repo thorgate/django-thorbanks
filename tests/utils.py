@@ -1,17 +1,16 @@
-from __future__ import unicode_literals
-
 import os
 
 from selenium.common.exceptions import NoSuchElementException
 
+
 IPIZZA_BANKS = [
-    'swedbank',
-    'seb',
-    'lhv',
-    'danske',
+    "swedbank",
+    "seb",
+    "lhv",
+    "danske",
 ]
 
-IS_TRAVIS = os.environ.get('TRAVIS', None)
+IS_TRAVIS = os.environ.get("TRAVIS", None)
 TIMEOUT = 400 if IS_TRAVIS else 20
 
 
@@ -33,8 +32,8 @@ def select_radio(name, value, selenium):
     checked = selenium.find_element_by_css_selector('input[name="%s"]:checked' % name)
 
     assert checked
-    assert checked.get_attribute('name') == name
-    assert checked.get_attribute('value') == value
+    assert checked.get_attribute("name") == name
+    assert checked.get_attribute("value") == value
 
 
 def set_input_text(name, value, selenium):
@@ -45,15 +44,15 @@ def set_input_text(name, value, selenium):
     element = selenium.find_element_by_css_selector('input[name="%s"]' % name)
 
     assert element
-    assert element.get_attribute('name') == name
-    assert element.get_attribute('value') == value
+    assert element.get_attribute("name") == name
+    assert element.get_attribute("value") == value
 
 
 def ready(d):
     return d.execute_script("return document.readyState") == "complete"
 
 
-def assert_no_errors(selenium, err_type='payment'):
+def assert_no_errors(selenium, err_type="payment"):
     try:
         err = selenium.find_element_by_css_selector("[data-%s-error]" % err_type)
 
@@ -61,21 +60,24 @@ def assert_no_errors(selenium, err_type='payment'):
         pass
 
     else:
-        raise AssertionError("Creating payment error: %s" % (err.text or err.get_attribute('data-payment-error')))
+        raise AssertionError(
+            "Creating payment error: %s"
+            % (err.text or err.get_attribute("data-payment-error"))
+        )
 
 
 def assert_ex_msg(e, expected):
-    if hasattr(e, 'value'):
+    if hasattr(e, "value"):
         if isinstance(e.value, Exception):
             e = e.value
 
-    message = getattr(e, 'message', getattr(e, 'args', ''))
+    message = getattr(e, "message", getattr(e, "args", ""))
 
     if isinstance(message, (list, tuple)):
         if message:
             message = message[0]
 
         else:
-            message = ''
+            message = ""
 
     assert message == expected

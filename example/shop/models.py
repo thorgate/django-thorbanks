@@ -1,17 +1,17 @@
-from __future__ import unicode_literals
-
 import logging
 
 from django.db import models
 from django.dispatch.dispatcher import receiver
 
-from thorbanks.signals import transaction_succeeded, transaction_failed
+from thorbanks.signals import transaction_failed, transaction_succeeded
 
 
 class Order(models.Model):
     amount = models.FloatField()
 
-    transaction = models.OneToOneField('thorbanks.Transaction', null=True, on_delete=models.SET_NULL)
+    transaction = models.OneToOneField(
+        "thorbanks_models.Transaction", null=True, on_delete=models.SET_NULL
+    )
     is_paid = models.BooleanField(default=False)
 
     def complete(self):
@@ -24,7 +24,7 @@ def banklink_success_callback(sender, transaction, **kwargs):
     """ Gets called when we have a confirmation from the bank that this transaction was completed.
          The logic should only be run on the first callback.
     """
-    logging.info("Banklink transfer callback with transaction %s" % transaction.id)
+    logging.info("Banklink transfer callback with transaction %s", transaction.id)
     try:
         # Mark the order as paid
         if transaction.order:
@@ -37,9 +37,9 @@ def banklink_success_callback(sender, transaction, **kwargs):
         # This is a very bad exception. It means the user gave us money, but for some reason we
         # couldn't give him the items(complete the purchase)
         # If this happens contact has to be made with the client to resolve the issue.
-        logging.exception("Transaction %d purchase failed." % transaction.id)
+        logging.exception("Transaction %d purchase failed.", transaction.id)
 
 
 @receiver(transaction_failed)
 def banklink_failed_callback(sender, transaction, **kwargs):
-    logging.warning("Transaction %d purchase failed." % transaction.id)
+    logging.warning("Transaction %d purchase failed.", transaction.id)
