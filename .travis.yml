@@ -85,19 +85,26 @@ jobs:
 after_success:
   - test $TOXENV = "py37-django30" && coveralls
 
+
+global:
+  secure: >
+    UPjRJ4zzxi4jzCFAL3ADQuOJq5jJmeUzEa0JslKboGlAcPd/l5FwtmyQIsAmEHGsGrWXUqOojCccgcur/5vWv5PElzWt3GX
+    6W7RUS9Bo58teLwzsaPVSzXqNFNmJUMpahCzAIFs2IcjQRClz+1MA9iQllA/Go0rPhV13NwaZXrwz2g1KIpAWcy7+NVwoOc
+    f5ZNHXZ1Fr6CzeAXGmZAxbSCGFIo1nwgZDJazvzG8nY0dRcDAfFKNCn+DQrzQjLOWZ3fOF8m+V/QnXpY6I7Nz9NBN5xUFoD
+    xFbQtkFQ3+QHJzAxDFz7GswZErSj+KlIPyhhjxdH+Oc77EHJWNEue9TuEqiPuelx933JhEwr8KxwRYzQYJozMorIOPlDUdi
+    dQEdORTBVfV5BK9GN45WSPMr8BAmZrHJbpFu2bOnmaPYNdQKcGgtR4FrsREWKHMVBpyeRt1QqIckDqKg0Oiv9VavoUHgsbi
+    L2kajJXu4JzY7B27PfCCZGTyYPI0x4Qfza7K4PSft0thdwXK4/4LZCi5F2/wIiGRsXmkZC1B8svSWiXeHc2Av1Rc4RHBxWW
+    WV1KJdZOlYOH3pi15+yrGBb482YbHdVRT87Qkk26fyKpqwiiUVVI1WnmQKOtfomaO+1rSUMsaMQtoNBaLv0k9ljzcjaYKGv
+    MSW1ItoMq32Y7Z3wWc=
+
+
+# See https://github.com/python-poetry/poetry/issues/366
+before_deploy:
+  - poetry config pypi-token.pypi $PYPI_TOKEN
+
 deploy:
-  provider: pypi
-  user: thorgate
-  password:
-    secure: >
-      U0LScBu0WYlcUTdUfNbfPNdl93AyksAWmSdxHgF925ErE2PWRy7CkGjVon+/sOT0OOmQiaLB0xnjpwF5O7hR8uhjWYcFx3YbdjRhdmM0x+Ulc
-      7pTUu7XP5skHWtfFxW1dzc3TP9P/5n4u+jj/YanduF1FC96VG/cd9OZlJJfe4zKRdJQ8o3NUvlJjJcVVAg39wSTKq6/dkxjIkHn0578CD3Kei
-      1zr5EntKfNxn4ER5lR20oHhIxPQVu2CHtrm0MvqZfAdFEpYq920fHGCFaaUpWdZ1gOpXS0O8C6uNRtPV38HBiqfEsqSY5JuRmLRh303Y+PhRn
-      WAY9GUGRnyZP8bfFOm9nE7+atKmP4sQaJals/3GHyyK4zNkYo1Lz4o7I6qpM9wMpo0y0L/OjhAyRvwvlwmSIT8MRu6Ihf+xV2br8ewBjiezDx
-      HP+gD5EC8kwMjT/fGYxwwN27SBc8jvEitb8H0yfsVHmYMmxTbGHADZLyvzLour59EaKvba0xWzXMeyxXog7kn40anZTsDQfPq0sX7QWuQruu0
-      Xk1BrTIpVXGYGqUw5sjyc7YiwkvpdCh5C+sooXVSUKfmsfZsZqJHT2lb5QHKeWyd/KrwH6nIRE6pmuK8ye/FJPc3lLiEBJlujDFmwRIWRQhTr
-      WgjxgoevQuSxwop0ANTAtPrKdoIcY=
-  distributions: sdist bdist_wheel
+  provider: script
+  script: poetry publish
   on:
     repo: thorgate/django-thorbanks
     tags: true
