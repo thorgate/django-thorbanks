@@ -81,10 +81,8 @@ jobs:
       env:
         - TOXENV=py38-django30
 
-
 after_success:
   - test $TOXENV = "py37-django30" && coveralls
-
 
 global:
   secure: >
@@ -97,10 +95,9 @@ global:
     WV1KJdZOlYOH3pi15+yrGBb482YbHdVRT87Qkk26fyKpqwiiUVVI1WnmQKOtfomaO+1rSUMsaMQtoNBaLv0k9ljzcjaYKGv
     MSW1ItoMq32Y7Z3wWc=
 
-
 # See https://github.com/python-poetry/poetry/issues/366
 before_deploy:
-  - poetry config pypi-token.pypi $PYPI_TOKEN
+  - export POETRY_PYPI_TOKEN_PYPI=$PYPI_TOKEN
 
 deploy:
   provider: script
