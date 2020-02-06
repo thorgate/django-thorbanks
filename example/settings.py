@@ -167,8 +167,6 @@ BANKLINKS = {
 # Tell django that thorbanks migrations are in thorbanks_models app
 MIGRATION_MODULES = {"thorbanks_models": "shop.thorbanks_migrations"}
 
-THORBANKS_MANUAL_MODELS = {}
-
 # Here you can customize where the bank logos are (used by the PaymentFormMixin). This is relative to STATIC_URL and
 #  must end with slash
 # BANKLINK_LOGO_PATH

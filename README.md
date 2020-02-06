@@ -68,6 +68,8 @@ Make django aware that thorbanks migrations are in your local apps folder via se
 MIGRATION_MODULES = {"thorbanks": "shop.thorbanks_models.migrations"}
 ```
 
+And run `makemigrations & migrate` management commands.
+
 ### 4. Link it to your Order model
 
 > Note: When using MANUAL_MODELS replace `thorbanks_models` with your local app name

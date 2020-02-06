@@ -24,12 +24,12 @@ def check_model_settings(app_configs, **kwargs):
 
         migration_modules = getattr(settings, "MIGRATION_MODULES", {})
 
-        if not migration_modules.get("thorbanks", ""):
+        if not migration_modules.get("thorbanks_models", ""):
             issues.append(
                 Error(
                     "Thorbanks is missing from settings.MIGRATION_MODULES",
                     hint="Add it to your settings like this - `MIGRATION_MODULES = "
-                    '{ "thorbanks": "shop.thorbanks_models.migrations" }.',
+                    '{ "thorbanks_models": "shop.thorbanks_migrations" }.',
                     id="thorbanks.E002",
                 )
             )
