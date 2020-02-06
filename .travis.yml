@@ -84,16 +84,17 @@ jobs:
 after_success:
   - test $TOXENV = "py37-django30" && coveralls
 
-global:
-  secure: >
-    UPjRJ4zzxi4jzCFAL3ADQuOJq5jJmeUzEa0JslKboGlAcPd/l5FwtmyQIsAmEHGsGrWXUqOojCccgcur/5vWv5PElzWt3GX
-    6W7RUS9Bo58teLwzsaPVSzXqNFNmJUMpahCzAIFs2IcjQRClz+1MA9iQllA/Go0rPhV13NwaZXrwz2g1KIpAWcy7+NVwoOc
-    f5ZNHXZ1Fr6CzeAXGmZAxbSCGFIo1nwgZDJazvzG8nY0dRcDAfFKNCn+DQrzQjLOWZ3fOF8m+V/QnXpY6I7Nz9NBN5xUFoD
-    xFbQtkFQ3+QHJzAxDFz7GswZErSj+KlIPyhhjxdH+Oc77EHJWNEue9TuEqiPuelx933JhEwr8KxwRYzQYJozMorIOPlDUdi
-    dQEdORTBVfV5BK9GN45WSPMr8BAmZrHJbpFu2bOnmaPYNdQKcGgtR4FrsREWKHMVBpyeRt1QqIckDqKg0Oiv9VavoUHgsbi
-    L2kajJXu4JzY7B27PfCCZGTyYPI0x4Qfza7K4PSft0thdwXK4/4LZCi5F2/wIiGRsXmkZC1B8svSWiXeHc2Av1Rc4RHBxWW
-    WV1KJdZOlYOH3pi15+yrGBb482YbHdVRT87Qkk26fyKpqwiiUVVI1WnmQKOtfomaO+1rSUMsaMQtoNBaLv0k9ljzcjaYKGv
-    MSW1ItoMq32Y7Z3wWc=
+env:
+  global:
+    secure: >
+      UPjRJ4zzxi4jzCFAL3ADQuOJq5jJmeUzEa0JslKboGlAcPd/l5FwtmyQIsAmEHGsGrWXUqOojCccgcur/5vWv5PElzWt3GX
+      6W7RUS9Bo58teLwzsaPVSzXqNFNmJUMpahCzAIFs2IcjQRClz+1MA9iQllA/Go0rPhV13NwaZXrwz2g1KIpAWcy7+NVwoOc
+      f5ZNHXZ1Fr6CzeAXGmZAxbSCGFIo1nwgZDJazvzG8nY0dRcDAfFKNCn+DQrzQjLOWZ3fOF8m+V/QnXpY6I7Nz9NBN5xUFoD
+      xFbQtkFQ3+QHJzAxDFz7GswZErSj+KlIPyhhjxdH+Oc77EHJWNEue9TuEqiPuelx933JhEwr8KxwRYzQYJozMorIOPlDUdi
+      dQEdORTBVfV5BK9GN45WSPMr8BAmZrHJbpFu2bOnmaPYNdQKcGgtR4FrsREWKHMVBpyeRt1QqIckDqKg0Oiv9VavoUHgsbi
+      L2kajJXu4JzY7B27PfCCZGTyYPI0x4Qfza7K4PSft0thdwXK4/4LZCi5F2/wIiGRsXmkZC1B8svSWiXeHc2Av1Rc4RHBxWW
+      WV1KJdZOlYOH3pi15+yrGBb482YbHdVRT87Qkk26fyKpqwiiUVVI1WnmQKOtfomaO+1rSUMsaMQtoNBaLv0k9ljzcjaYKGv
+      MSW1ItoMq32Y7Z3wWc=
 
 # See https://github.com/python-poetry/poetry/issues/366
 before_deploy:
