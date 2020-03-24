@@ -14,11 +14,18 @@ from thorbanks.utils import calculate_731_checksum, create_signature
 
 
 class AuthRequestBase(forms.Form):
-    def __init__(self, bank_name, redirect_to, response_url, *args, **kwargs):
+    def __init__(
+        self, bank_name, redirect_to, response_url, *args, extra_fields=None, **kwargs
+    ):
         self.auth = settings.get_model("Authentication")()
         self.auth.bank_name = bank_name
         self.auth.redirect_after_success = redirect_to
         self.auth.redirect_on_failure = redirect_to
+
+        if extra_fields is not None:
+            for key, value in extra_fields.items():
+                setattr(self.auth, key, value)
+
         self.auth.save()
 
         initial = self.prepare(bank_name, redirect_to, response_url, *args, **kwargs)
@@ -104,7 +111,7 @@ class IPizzaAuthRequest(AuthRequestBase):
 
 
 class PaymentRequestBase(forms.Form):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, extra_fields=None, **kwargs):
         self.transaction = settings.get_model("Transaction")()
         self.transaction.bank_name = kwargs["bank_name"]
         self.transaction.description = kwargs["message"]
@@ -114,6 +121,11 @@ class PaymentRequestBase(forms.Form):
 
         self.transaction.redirect_after_success = kwargs["redirect_to"]
         self.transaction.redirect_on_failure = kwargs["redirect_on_failure"]
+
+        if extra_fields is not None:
+            for key, value in extra_fields.items():
+                setattr(self.transaction, key, value)
+
         self.transaction.save()
 
         transaction_started.send(

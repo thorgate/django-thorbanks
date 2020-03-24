@@ -99,7 +99,7 @@ See [example.shop.models.banklink_success_callback](example/shop/models.py#L23) 
 
 ### 8. Create views and forms for payments:
 
-see [example.shop.views](example/shop/views.py) and [example.shop.views](example/shop/forms.py).
+see [example.shop.views](example/shop/views.py) and [example.shop.forms](example/shop/forms.py).
 
 ## iPizza protocol
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-thorbanks"
-version = "0.6.0"
+version = "0.6.1"
 description = "`django-thorbanks` provides a Django application for Estonian banklinks (iPizza protocol)."
 authors = ["Thorgate <info@thorgate.eu>"]
 license = "BSD-3-Clause"
@@ -19,8 +19,6 @@ classifiers = [
 packages = [
     { include = "thorbanks" },
     { include = "thorbanks_models" },
-    { include = "example" },
-    { include = "tests" }
 ]
 include = [
     "README.md",

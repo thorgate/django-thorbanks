@@ -92,7 +92,14 @@ def response(request):
 
 
 def create_payment_request(
-    bank_name, message, amount, currency, pingback_url, redirect_to, redirect_on_failure
+    bank_name,
+    message,
+    amount,
+    currency,
+    pingback_url,
+    redirect_to,
+    redirect_on_failure,
+    extra_fields=None,
 ):
     return PaymentRequest(
         bank_name=bank_name,
@@ -102,10 +109,13 @@ def create_payment_request(
         redirect_on_failure=redirect_on_failure,
         message=message,
         url=pingback_url,
+        extra_fields=extra_fields,
     )
 
 
-def create_auth_request(request, bank_name, response_url, redirect_to=None):
+def create_auth_request(
+    request, bank_name, response_url, redirect_to=None, extra_fields=None
+):
     request_form_classes = {
         "ipizza": IPizzaAuthRequest,
     }
@@ -117,6 +127,7 @@ def create_auth_request(request, bank_name, response_url, redirect_to=None):
         bank_name=bank_name,
         response_url=response_url,
         redirect_to=redirect_to or response_url,
+        extra_fields=extra_fields,
     )
 
 
