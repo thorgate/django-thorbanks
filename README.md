@@ -72,6 +72,8 @@ Now run `makemigrations thorbanks_models` and `migrate` management commands to c
 
 ### 4. Add settings.BANKLINKS
 
+For a working example see the definitions in [example/settings.py](example/settings.py).
+
 ### 5. Link Transaction to your Order model
 
 > Note: When using MANUAL_MODELS replace `thorbanks_models` with your local app name
