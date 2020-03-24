@@ -156,7 +156,7 @@ def check_banklink_settings(app_configs, **kwargs):
         issues.append(
             Error(
                 "settings.BANKLINKS must be a dict",
-                hint="See docstring of thorbanks.settings.get_banklinks for reference.",
+                hint="See docstring of thorbanks.settings.parse_banklinks for reference.",
                 id="thorbanks.E004",
             )
         )

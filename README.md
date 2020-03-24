@@ -64,13 +64,15 @@ Make django aware that thorbanks migrations are in your local apps folder via se
 > Note: Replace `shop` with the name of an existing app in your project.
 
 ```python
-# Tell django that thorbanks migrations are in thorbanks_models app
-MIGRATION_MODULES = {"thorbanks": "shop.thorbanks_models.migrations"}
+# Tell django that thorbanks_models migrations are in shop app (in thorbanks_migrations module)
+MIGRATION_MODULES = {"thorbanks_models": "shop.thorbanks_migrations"}
 ```
 
-And run `makemigrations & migrate` management commands.
+Now run `makemigrations thorbanks_models` and `migrate` management commands to create and apply the migrations.
 
-### 4. Link it to your Order model
+### 4. Add settings.BANKLINKS
+
+### 5. Link Transaction to your Order model
 
 > Note: When using MANUAL_MODELS replace `thorbanks_models` with your local app name
 
@@ -82,7 +84,7 @@ class Order(models.Model):
     )
 ```
 
-### 5. Include thorbanks urls
+### 6. Include thorbanks urls
 
 ```python
 urlpatterns = [
@@ -91,11 +93,11 @@ urlpatterns = [
 ]
 ```
 
-### 6. Add listeners to banklinks success & failure callbacks:
+### 7. Add listeners to banklinks success & failure callbacks:
 
 See [example.shop.models.banklink_success_callback](example/shop/models.py#L23) and [example.shop.models.banklink_failed_callback](example/shop/models.py#L44).
 
-### 7. Create views and forms for payments:
+### 8. Create views and forms for payments:
 
 see [example.shop.views](example/shop/views.py) and [example.shop.views](example/shop/forms.py).
 

@@ -5,12 +5,12 @@ from django.conf import settings
 
 
 def parse_banklinks(config=None):
-    """Validates settings.BANKLINKS and add defaults
+    """Validates settings.BANKLINKS and add defaults to items
 
     for a working example see the definitions in `example/settings.py`
     """
     if config is None:
-        config = settings.BANKLINKS
+        config = getattr(settings, "BANKLINKS")
 
     result = {}
 
@@ -60,25 +60,23 @@ def get_model(model_name):
 
     Example settings:
         # Note: Make sure that "thorbanks_models" is not in INSTALLED_APPS
-
-        MIGRATION_MODULES = {
-            "thorbanks": "myapp.thorbanks_migrations",
-        }
+        # Note 2: With manual models one does not need to add thorbanks under `MIGRATION_MODULES`
 
         THORBANKS_MANUAL_MODELS = {
             "Authentication": "myapp.Authentication",
-            "Authentication": "myapp.Transaction",
+            "Transaction": "myapp.Transaction",
         }
 
     Example myapp/models.py:
+        # Note: If you only use Authentication then feel free to not add Transaction model (or vice-versa).
 
         class Authentication(AbstractAuthentication):
-            class Meta:
-                app_label = 'thorbanks'
+            pass
 
         class Transaction(AbstractTransaction):
-            class Meta:
-                app_label = 'thorbanks'
+            pass
+
+    Finally run `makemigrations myapp` to create migrations for newly registered models.
     """
     model_full_name = get_model_name(model_name) or "thorbanks_models.%s" % model_name
     return apps.get_model(model_full_name)
