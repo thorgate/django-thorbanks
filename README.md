@@ -74,6 +74,13 @@ Now run `makemigrations thorbanks_models` and `migrate` management commands to c
 
 For a working example see the definitions in [example/settings.py](example/settings.py).
 
+> Note:
+>You will need a public and private key for each bank integration.
+>In case you don't have the public key, you can generate one out of a certificate by:
+>```
+>openssl x509 -pubkey -noout -in cert.pem  > pubkey.pem
+>```
+
 ### 5. Link Transaction to your Order model
 
 > Note: When using MANUAL_MODELS replace `thorbanks_models` with your local app name
