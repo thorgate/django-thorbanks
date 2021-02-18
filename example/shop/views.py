@@ -44,7 +44,13 @@ class PaymentView(CreateView):
         # WARNING: Don't use this in production code
         old_val = get_links()[bank_name].get("SEND_REF", True)
         send_ref = self.request.GET.get("send_ref", "1") == "1"
-        configure(__only_use_during_tests={bank_name: {"SEND_REF": send_ref,}})
+        configure(
+            __only_use_during_tests={
+                bank_name: {
+                    "SEND_REF": send_ref,
+                }
+            }
+        )
 
         # Create new payment request
         payment = create_payment_request(
@@ -58,7 +64,13 @@ class PaymentView(CreateView):
         )
 
         # restore old SEND_REF value
-        configure(__only_use_during_tests={bank_name: {"SEND_REF": old_val,}})
+        configure(
+            __only_use_during_tests={
+                bank_name: {
+                    "SEND_REF": old_val,
+                }
+            }
+        )
 
         # Attach the pending transaction object to the Order object
         self.object.transaction = payment.transaction
@@ -89,7 +101,9 @@ class AuthenticationView(FormView):
         # Create new auth request
         bank_name = form.cleaned_data["bank_name"]
         auth_form = create_auth_request(
-            request=self.request, bank_name=bank_name, response_url=redirect_url,
+            request=self.request,
+            bank_name=bank_name,
+            response_url=redirect_url,
         )
 
         # Finally, return the HTTP response which redirects the user to the bank
@@ -138,7 +152,7 @@ def show_server_error(request):
 
     Templates: `500.html`
     Context: sys.exc_info() results
-     """
+    """
     exc_type, exc_value, exc_traceback = sys.exc_info()
     error = ExceptionReporter(request, exc_type, exc_value, exc_traceback)
     return http.HttpResponseServerError(error.get_traceback_html())

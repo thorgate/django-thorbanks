@@ -186,7 +186,7 @@ class PaymentRequestBase(forms.Form):
 
 
 class PaymentRequest(PaymentRequestBase):
-    """ Creates payment request and Transaction object.
+    """Creates payment request and Transaction object.
 
     It also acts as a facade through which transaction object and HTTP redirect can be retrieved.
     """
@@ -247,8 +247,7 @@ class PaymentFormMixin:
     """
 
     class BankNameFieldWidget(RadioSelect):
-        """ Augmented RadioSelect that lets us use our own CSS class.
-        """
+        """Augmented RadioSelect that lets us use our own CSS class."""
 
         template_name = "thorbanks/payment_widget.html"
         option_template_name = "thorbanks/input_option.html"

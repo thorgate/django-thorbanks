@@ -21,8 +21,8 @@ class Order(models.Model):
 
 @receiver(transaction_succeeded)
 def banklink_success_callback(sender, transaction, **kwargs):
-    """ Gets called when we have a confirmation from the bank that this transaction was completed.
-         The logic should only be run on the first callback.
+    """Gets called when we have a confirmation from the bank that this transaction was completed.
+    The logic should only be run on the first callback.
     """
     logging.info("Banklink transfer callback with transaction %s", transaction.id)
     try:

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-thorbanks"
-version = "0.6.0"
+version = "0.6.1"
 description = "`django-thorbanks` provides a Django application for Estonian banklinks (iPizza protocol)."
 authors = ["Thorgate <info@thorgate.eu>"]
 license = "BSD-3-Clause"
@@ -32,22 +32,22 @@ exclude = ["**/migrations/*"]
 [tool.poetry.dependencies]
 python = "^3.6"
 Django = ">=1.11.27"
-cryptography = "==2.*"
+cryptography = ">=2.*"
 
 [tool.poetry.dev-dependencies]
-pytest = "==5.*"
-coverage = "==4.*"
-coveralls = "==1.*"
+pytest = "==6.*"
+coverage = "==5.*"
+coveralls = "==3.*"
 pytest-cov = "==2.*"
-pytest-django = "==3.*"
+pytest-django = "==4.*"
 pytest-timeout = "==1.*"
 mock = ">=1.0.1"
 tox = "==3.*"
-pytest-selenium = "==1.*"
+pytest-selenium = "==2.*"
 selenium = "==3.*"
-black = "==19.10b0"
-isort = "==4.*"
-prospector = "==1.*"
+black = "==20.8b1"
+isort = "*"
+prospector = "==1.3.*"
 
 
 [tool.black]
