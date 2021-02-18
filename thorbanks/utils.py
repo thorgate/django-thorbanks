@@ -119,7 +119,7 @@ def get_ordered_request(request, auth=False, response=False):
 
 def request_digest(request, bank_name, auth=False, response=False):
     """
-        return request digest in Banklink signature form (see docs for format)
+    return request digest in Banklink signature form (see docs for format)
     """
     request = get_ordered_request(request, auth=auth, response=response)
     digest = ""
@@ -141,7 +141,7 @@ def get_pkey(bank_name):
 
 def create_signature(request, bank_name, auth=False):
     """
-        sign BankLink request in dict format with private_key
+    sign BankLink request in dict format with private_key
     """
     digest = request_digest(request, bank_name, auth=auth)
 
@@ -153,7 +153,7 @@ def create_signature(request, bank_name, auth=False):
 
 def verify_signature(request, bank_name, signature, auth=False, response=False):
     """
-        verify BankLink reply signature
+    verify BankLink reply signature
     """
     signature = force_str(signature)
 
@@ -174,8 +174,7 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
 
 
 def weight_generator():
-    """ Used for weight generation by calculate_731_checksum
-    """
+    """Used for weight generation by calculate_731_checksum"""
     while True:
         yield 7
         yield 3

@@ -4,8 +4,7 @@ from django.utils.module_loading import import_string as base_import_string
 
 
 def is_model_registered(app_label, model_name):
-    """ Checks whether a given model is registered.
-    """
+    """Checks whether a given model is registered."""
     try:
         apps.get_registered_model(app_label, model_name)
     except LookupError:

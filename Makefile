@@ -10,7 +10,7 @@ black:
 
 
 isort-run:
-	isort --recursive $(cmd) -p .
+	isort . $(cmd)
 
 
 isort:
