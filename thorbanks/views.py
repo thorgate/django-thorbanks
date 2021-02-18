@@ -62,13 +62,13 @@ def response(request):
             # Mark purchase as complete
             transaction.status = klass.STATUS_COMPLETED
             transaction.save()
-            transaction_succeeded.send(klass, transaction=transaction)
+            transaction_succeeded.send(klass, transaction=transaction, request=request)
     elif data["VK_SERVICE"] == "1911":
         if transaction.status == klass.STATUS_PENDING:
             # Mark purchase as failed
             transaction.status = klass.STATUS_FAILED
             transaction.save()
-            transaction_failed.send(klass, transaction=transaction)
+            transaction_failed.send(klass, transaction=transaction, request=request)
     else:
         logging.critical(
             "thorbanks.views.response(): Got invalid VK_SERVICE code from bank: %s (transaction %s)",

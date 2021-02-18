@@ -10,7 +10,7 @@ black:
 
 
 isort-run:
-	isort . $(cmd)
+	isort -p . $(cmd)
 
 
 isort:

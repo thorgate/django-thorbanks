@@ -40,6 +40,14 @@ class AbstractTransaction(models.Model):
         verbose_name = _("transaction")
         ordering = ["-last_modified"]
 
+    @property
+    def message(self):
+        return self.description
+
+    @message.setter
+    def message(self, value):
+        self.description = value
+
 
 class AbstractAuthentication(models.Model):
     STATUS_PENDING = "P"
