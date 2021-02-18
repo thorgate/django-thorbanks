@@ -112,25 +112,29 @@ class IPizzaAuthRequest(AuthRequestBase):
 
 class PaymentRequestBase(forms.Form):
     def __init__(self, *args, extra_fields=None, **kwargs):
-        self.transaction = settings.get_model("Transaction")()
-        self.transaction.bank_name = kwargs["bank_name"]
-        self.transaction.description = kwargs["message"]
-        self.transaction.amount = round(kwargs["amount"], 2)
-        self.transaction.currency = kwargs["currency"]
-        self.transaction.message = kwargs["message"]
+        if "existing_transaction" in kwargs:
+            self.transaction = kwargs.pop("existing_transaction")
 
-        self.transaction.redirect_after_success = kwargs["redirect_to"]
-        self.transaction.redirect_on_failure = kwargs["redirect_on_failure"]
+        else:
+            self.transaction = settings.get_model("Transaction")()
+            self.transaction.bank_name = kwargs["bank_name"]
+            self.transaction.description = kwargs["message"]
+            self.transaction.amount = round(kwargs["amount"], 2)
+            self.transaction.currency = kwargs["currency"]
+            self.transaction.message = kwargs["message"]
 
-        if extra_fields is not None:
-            for key, value in extra_fields.items():
-                setattr(self.transaction, key, value)
+            self.transaction.redirect_after_success = kwargs["redirect_to"]
+            self.transaction.redirect_on_failure = kwargs["redirect_on_failure"]
 
-        self.transaction.save()
+            if extra_fields is not None:
+                for key, value in extra_fields.items():
+                    setattr(self.transaction, key, value)
 
-        transaction_started.send(
-            settings.get_model("Transaction"), transaction=self.transaction
-        )
+            self.transaction.save()
+
+            transaction_started.send(
+                settings.get_model("Transaction"), transaction=self.transaction
+            )
 
         initial = self.prepare(self.transaction, kwargs["url"])
 
