@@ -35,7 +35,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
         bank_name
         or "swedbank": {
             "PRINTABLE_NAME": printable_name or "Swedbank",
-            "REQUEST_URL": "http://banks.maximum.thorgate.eu/banklink/swedbank-common",
+            "REQUEST_URL": "https://banks.pastel.thorgate.eu/banklink/swedbank-common",
             "CLIENT_ID": "uid100052",
             "BANK_ID": "HP",
             "PRIVATE_KEY": os.path.join(base_dir, "certs", "swed_key.pem"),
@@ -47,7 +47,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
         },
         "seb": {
             "PRINTABLE_NAME": "SEB",
-            "REQUEST_URL": "http://banks.maximum.thorgate.eu/banklink/seb-common",
+            "REQUEST_URL": "https://banks.pastel.thorgate.eu/banklink/seb-common",
             "CLIENT_ID": "uid100036",
             "BANK_ID": "EYP",
             "PRIVATE_KEY": os.path.join(base_dir, "certs", "seb_key.pem"),
@@ -60,7 +60,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
         },
         "lhv": {
             "PRINTABLE_NAME": "LHV",
-            "REQUEST_URL": "http://banks.maximum.thorgate.eu/banklink/lhv-common",
+            "REQUEST_URL": "https://banks.pastel.thorgate.eu/banklink/lhv-common",
             "CLIENT_ID": "uid100049",
             "BANK_ID": "LHV",
             "PRIVATE_KEY": os.path.join(base_dir, "certs", "lhv_key.pem"),
@@ -71,7 +71,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
         },
         "danske": {
             "PRINTABLE_NAME": "Danske",
-            "REQUEST_URL": "http://banks.maximum.thorgate.eu/banklink/sampo-common",
+            "REQUEST_URL": "https://banks.pastel.thorgate.eu/banklink/sampo-common",
             "CLIENT_ID": "uid100010",
             "BANK_ID": "SAMPOPANK",
             "PRIVATE_KEY": os.path.join(base_dir, "certs", "danske_key.pem"),

@@ -1,5 +1,7 @@
 import django
+
 from thorbanks.views import response
+
 
 if django.VERSION >= (4, 0):
     from django.urls import re_path

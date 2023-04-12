@@ -81,6 +81,10 @@ jobs:
       env:
         - TOXENV=py38-django30
 
+    - python: "3.9"
+      env:
+        - TOXENV=py39-django-40
+
 after_success:
   - test $TOXENV = "py37-django30" && coveralls
 

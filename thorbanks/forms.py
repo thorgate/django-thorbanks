@@ -46,7 +46,7 @@ class AuthRequestBase(forms.Form):
         raise NotImplementedError  # pragma no cover
 
     def redirect_html(self):
-        """ Redirection html """
+        """Redirection html"""
         html = (
             '<form action="%s" method="POST" id="banklink_redirect_url" accept-charset="%s">'
             % (self.get_request_url(), self.get_encoding())
