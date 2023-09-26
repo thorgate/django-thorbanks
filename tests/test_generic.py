@@ -44,6 +44,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
             "IMAGE_PATH": "swedbank.png",
             "ORDER": 1,
             "SEND_REF": True,
+            "HASH_ALGORITHM": "sha1",
         },
         "seb": {
             "PRINTABLE_NAME": "SEB",
@@ -57,6 +58,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
             "IMAGE_PATH": "seb.png",
             "ORDER": 2,
             "SEND_REF": False,
+            "HASH_ALGORITHM": "sha256",
         },
         "lhv": {
             "PRINTABLE_NAME": "LHV",
@@ -153,6 +155,9 @@ def test_getters(settings):
     assert th_settings.get_client_id("swedbank") == conf["swedbank"]["CLIENT_ID"]
     assert th_settings.get_request_url("swedbank") == conf["swedbank"]["REQUEST_URL"]
     assert th_settings.get_link_type("swedbank") == conf["swedbank"]["TYPE"]
+    assert (
+        th_settings.get_hash_algorithm("swedbank") == conf["swedbank"]["HASH_ALGORITHM"]
+    )
 
     assert th_settings.get_send_ref("swedbank") == conf["swedbank"]["SEND_REF"]
     assert th_settings.get_send_ref("seb") == conf["seb"]["SEND_REF"]
