@@ -1,6 +1,7 @@
 import os
 
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 
 
 IPIZZA_BANKS = [
@@ -15,7 +16,7 @@ TIMEOUT = 400 if IS_TRAVIS else 20
 
 
 def click(selector, selenium):
-    element = selenium.find_element_by_css_selector(selector)
+    element = selenium.find_element(By.CSS_SELECTOR, selector)
 
     assert element and (not isinstance(element, list) or len(element) == 1)
 
@@ -29,7 +30,7 @@ def click(selector, selenium):
 
 def select_radio(name, value, selenium):
     click('input[name="%s"][value="%s"]' % (name, value), selenium)
-    checked = selenium.find_element_by_css_selector('input[name="%s"]:checked' % name)
+    checked = selenium.find_element(By.CSS_SELECTOR, 'input[name="%s"]:checked' % name)
 
     assert checked
     assert checked.get_attribute("name") == name
@@ -41,7 +42,7 @@ def set_input_text(name, value, selenium):
 
     element.clear()
     element.send_keys(value)
-    element = selenium.find_element_by_css_selector('input[name="%s"]' % name)
+    element = selenium.find_element(By.CSS_SELECTOR, 'input[name="%s"]' % name)
 
     assert element
     assert element.get_attribute("name") == name
@@ -54,7 +55,7 @@ def ready(d):
 
 def assert_no_errors(selenium, err_type="payment"):
     try:
-        err = selenium.find_element_by_css_selector("[data-%s-error]" % err_type)
+        err = selenium.find_element(By.CSS_SELECTOR, "[data-%s-error]" % err_type)
 
     except NoSuchElementException:
         pass
