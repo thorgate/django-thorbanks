@@ -139,14 +139,25 @@ def get_pkey(bank_name):
     return private_key
 
 
-def create_signature(request, bank_name, auth=False):
+def create_signature(request, bank_name, hash_algorithm="sha1", auth=False):
     """
     sign BankLink request in dict format with private_key
     """
     digest = request_digest(request, bank_name, auth=auth)
 
     private_key = get_pkey(bank_name)
-    signature = private_key.sign(digest, padding.PKCS1v15(), hashes.SHA1())
+
+    hash_algorithms = {
+        "sha256": hashes.SHA256(),
+        "sha1": hashes.SHA1(),
+    }
+    hasher = hash_algorithms.get(hash_algorithm)
+    if hasher is None:
+        raise ValueError(
+            "Invalid hash algorithm %s used for %s" % (hash_algorithm, bank_name)
+        )
+
+    signature = private_key.sign(digest, padding.PKCS1v15(), hasher)
 
     return force_str(b64encode(signature))
 
@@ -162,16 +173,17 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
 
     digest = request_digest(request, bank_name, auth=auth, response=response)
 
-    try:
-        public_key.verify(
-            b64decode(signature), digest, padding.PKCS1v15(), hashes.SHA1()
-        )
+    hash_algorithms = [hashes.SHA1(), hashes.SHA256()]
+    for hash_algorithm in hash_algorithms:
+        try:
+            public_key.verify(
+                b64decode(signature), digest, padding.PKCS1v15(), hash_algorithm
+            )
+            return True
 
-        return True
-
-    except InvalidSignature:
-        return False
-
+        except InvalidSignature:
+            pass
+    return False
 
 def weight_generator():
     """Used for weight generation by calculate_731_checksum"""

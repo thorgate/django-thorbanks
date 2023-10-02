@@ -77,8 +77,8 @@ def test_payment_flow(bank_name, send_ref, live_server, selenium):
     set_input_text("senderName", "Tõõgera Leõpäöldi", selenium)
 
     # Check that the amount is correct
-    elem = selenium.find_element_by_css_selector(
-        "form table tr:last-child td:last-child"
+    elem = selenium.find_element(
+        By.CSS_SELECTOR, "form table tr:last-child td:last-child"
     )
     assert elem
     assert elem.text.replace(" ", "") == ("%.2f€" % amount).replace(".", ",")

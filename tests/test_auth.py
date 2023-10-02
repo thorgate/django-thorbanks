@@ -81,13 +81,13 @@ def test_auth_flow(bank_name, live_server, selenium):
     WebDriverWait(selenium, 10).until(expected_conditions.title_contains("Thorbanks"))
 
     # Assert correct result
-    result = selenium.find_element_by_css_selector("[data-result]")
+    result = selenium.find_element(By.CSS_SELECTOR, "[data-result]")
     assert result and result.text == "success"
 
     # Assert name
-    result = selenium.find_element_by_css_selector("[data-name]")
+    result = selenium.find_element(By.CSS_SELECTOR, "[data-name]")
     assert result and result.text == "Tõõgera Leõpäöldi"
 
     # Assert person code
-    result = selenium.find_element_by_css_selector("[data-code]")
+    result = selenium.find_element(By.CSS_SELECTOR, "[data-code]")
     assert result and result.text == "51001091072"

@@ -24,6 +24,7 @@ def parse_banklinks(config=None):
                     "SEND_REF": True,
                     "PUBLIC_KEY": None,
                     "PRIVATE_KEY": None,
+                    "HASH_ALGORITHM": "sha1",
                 }
 
                 final_data.update(bank_data)
@@ -119,6 +120,10 @@ def get_link_protocol(the_bank):
 
 def get_send_ref(the_bank):
     return get_links()[the_bank]["SEND_REF"]
+
+
+def get_hash_algorithm(the_bank):
+    return get_links()[the_bank]["HASH_ALGORITHM"]
 
 
 def get_bank_choices():
