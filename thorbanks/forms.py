@@ -93,7 +93,7 @@ class IPizzaAuthRequest(AuthRequestBase):
     def prepare(self, bank_name, redirect_to, response_url, *args, **kwargs):
         initial = {
             "VK_SERVICE": "4012",
-            "VK_VERSION": "008",
+            "VK_VERSION": settings.get_version(bank_name),
             "VK_SND_ID": settings.get_client_id(bank_name),
             "VK_REC_ID": settings.get_bank_id(bank_name),
             "VK_NONCE": self.auth.pk,
@@ -215,7 +215,7 @@ class PaymentRequest(PaymentRequestBase):
 
         return {
             "VK_SERVICE": "1012",
-            "VK_VERSION": "008",
+            "VK_VERSION": settings.get_version(transaction.bank_name),
             "VK_ENCODING": self.get_encoding(),
             "VK_DATETIME": transaction.created.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "VK_RETURN": url,

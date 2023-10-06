@@ -62,6 +62,12 @@ IPIZZA_REQUEST_ORDER = {
     ),
 }
 
+HASH_ALGORITHMS = {
+    "sha1": hashes.SHA1(),  # Should be used for banklink 1.1 specification (008)
+    "sha512": hashes.SHA512(),  # Should be used for banklink 1.2 specification (009)
+    "sha256": hashes.SHA256(),  # Potentially unused, was supported for SEB with their own updated 1.1 specification
+}
+
 
 def get_ordered_request(request, auth=False, response=False):
     def append_if_exists(target, source, the_value):
@@ -147,11 +153,7 @@ def create_signature(request, bank_name, hash_algorithm="sha1", auth=False):
 
     private_key = get_pkey(bank_name)
 
-    hash_algorithms = {
-        "sha256": hashes.SHA256(),
-        "sha1": hashes.SHA1(),
-    }
-    hasher = hash_algorithms.get(hash_algorithm)
+    hasher = HASH_ALGORITHMS.get(hash_algorithm)
     if hasher is None:
         raise ValueError(
             "Invalid hash algorithm %s used for %s" % (hash_algorithm, bank_name)
@@ -173,8 +175,7 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
 
     digest = request_digest(request, bank_name, auth=auth, response=response)
 
-    hash_algorithms = [hashes.SHA1(), hashes.SHA256()]
-    for hash_algorithm in hash_algorithms:
+    for hash_algorithm in HASH_ALGORITHMS.values():
         try:
             public_key.verify(
                 b64decode(signature), digest, padding.PKCS1v15(), hash_algorithm
@@ -184,6 +185,7 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
         except InvalidSignature:
             pass
     return False
+
 
 def weight_generator():
     """Used for weight generation by calculate_731_checksum"""

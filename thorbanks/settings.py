@@ -25,6 +25,7 @@ def parse_banklinks(config=None):
                     "PUBLIC_KEY": None,
                     "PRIVATE_KEY": None,
                     "HASH_ALGORITHM": "sha1",
+                    "VK_VERSION": "008",
                 }
 
                 final_data.update(bank_data)
@@ -104,6 +105,10 @@ def get_client_id(the_bank):
 
 def get_bank_id(the_bank):
     return get_links()[the_bank]["BANK_ID"]
+
+
+def get_version(the_bank):
+    return get_links()[the_bank]["VK_VERSION"]
 
 
 def get_request_url(the_bank):

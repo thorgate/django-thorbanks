@@ -59,6 +59,7 @@ def get_banklink_config(bank_name=None, printable_name=None):
             "ORDER": 2,
             "SEND_REF": False,
             "HASH_ALGORITHM": "sha256",
+            "VK_VERSION": "009",
         },
         "lhv": {
             "PRINTABLE_NAME": "LHV",
@@ -162,6 +163,8 @@ def test_getters(settings):
     assert th_settings.get_send_ref("swedbank") == conf["swedbank"]["SEND_REF"]
     assert th_settings.get_send_ref("seb") == conf["seb"]["SEND_REF"]
     assert th_settings.get_send_ref("danske") is True
+
+    assert th_settings.get_version("seb") == conf["seb"]["VK_VERSION"]
 
     the_list = th_settings.get_bank_choices()
     assert isinstance(the_list, list)
