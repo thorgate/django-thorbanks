@@ -1,3 +1,4 @@
+import logging
 from base64 import b64decode, b64encode
 from functools import reduce
 
@@ -67,6 +68,15 @@ HASH_ALGORITHMS = {
     "sha512": hashes.SHA512(),  # Should be used for banklink 1.2 specification (009)
     "sha256": hashes.SHA256(),  # Potentially unused, was supported for SEB with their own updated 1.1 specification
 }
+
+
+def _get_hasher(hash_algorithm, bank_name):
+    hasher = HASH_ALGORITHMS.get(hash_algorithm)
+    if hasher is None:
+        raise ValueError(
+            "Invalid hash algorithm %s used for %s" % (hash_algorithm, bank_name)
+        )
+    return hasher
 
 
 def get_ordered_request(request, auth=False, response=False):
@@ -153,12 +163,7 @@ def create_signature(request, bank_name, hash_algorithm="sha1", auth=False):
 
     private_key = get_pkey(bank_name)
 
-    hasher = HASH_ALGORITHMS.get(hash_algorithm)
-    if hasher is None:
-        raise ValueError(
-            "Invalid hash algorithm %s used for %s" % (hash_algorithm, bank_name)
-        )
-
+    hasher = _get_hasher(hash_algorithm, bank_name)
     signature = private_key.sign(digest, padding.PKCS1v15(), hasher)
 
     return force_str(b64encode(signature))
@@ -175,16 +180,41 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
 
     digest = request_digest(request, bank_name, auth=auth, response=response)
 
-    for hash_algorithm in HASH_ALGORITHMS.values():
-        try:
-            public_key.verify(
-                b64decode(signature), digest, padding.PKCS1v15(), hash_algorithm
-            )
-            return True
+    hash_algorithm = settings.get_hash_algorithm(bank_name)
+    hasher = _get_hasher(hash_algorithm, bank_name)
 
-        except InvalidSignature:
-            pass
-    return False
+    try:
+        public_key.verify(b64decode(signature), digest, padding.PKCS1v15(), hasher)
+        return True
+    except InvalidSignature:
+        # Verification with the configured hash algorithm failed. We will try to verify
+        # with the other hash algorithms as a fallback in case the bank has switched
+        # to a new hash algorithm.
+        for hash_algorithm, hasher in HASH_ALGORITHMS.items():
+            try:
+                public_key.verify(
+                    b64decode(signature), digest, padding.PKCS1v15(), hasher
+                )
+                logging.warning(
+                    "%s banklink is using %s hash algorithm, "
+                    "but the banklink configuration is using %s.",
+                    bank_name,
+                    hash_algorithm,
+                    settings.get_hash_algorithm(bank_name),
+                )
+                return True
+            except InvalidSignature:
+                pass
+
+        if not auth:
+            # The client might have paid, but we don't accept the banklink response.
+            # Need to check if the payment was successful and contact the client!
+            logging.critical(
+                "Signature verification for the successful %s banklink callback has "
+                "failed. Immediate action required to confirm the payment's status.",
+                bank_name,
+            )
+        return False
 
 
 def weight_generator():
