@@ -180,7 +180,7 @@ def verify_signature(request, bank_name, signature, auth=False, response=False):
 
     digest = request_digest(request, bank_name, auth=auth, response=response)
 
-    hash_algorithm = settings.get_hash_algorithm(bank_name)
+    hash_algorithm = settings.get_verify_hash_algorithm(bank_name)
     hasher = _get_hasher(hash_algorithm, bank_name)
 
     try:

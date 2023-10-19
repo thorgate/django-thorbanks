@@ -235,7 +235,7 @@ class PaymentRequest(PaymentRequestBase):
         self.data["VK_MAC"] = create_signature(
             self.cleaned_data,
             self.transaction.bank_name,
-            settings.get_hash_algorithm(self.transaction.bank_name),
+            settings.get_sign_hash_algorithm(self.transaction.bank_name),
         )
 
 
